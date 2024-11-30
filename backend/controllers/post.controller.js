@@ -251,7 +251,7 @@ export const getLikedPosts = async (req, res) => {
     const currentUserId = req.user._id;
     try {
         const user = await User.findById(currentUserId);
-        if (!user)
+        if (!user) 
             return res
                 .status(404)
                 .json({message: 'User not found'});
@@ -264,11 +264,11 @@ export const getLikedPosts = async (req, res) => {
             .populate({path: "user", select: "-password"})
             .populate({path: "comments.user", select: "-password"});
 
-        if (likedPosts.length <= 0)
+        if (likedPosts.length <= 0) 
             return res
                 .status(200)
                 .json([]);
-
+        
         return res
             .status(200)
             .json(likedPosts);
@@ -284,17 +284,22 @@ export const getFollowingPosts = async (req, res) => {
     try {
         const currentUserId = req.user._id;
         const user = await User.findById(currentUserId);
-        if (!user)
+        if (!user) 
             return res
                 .status(404)
                 .json({message: 'User not found'});
-
+        
         const following = user.following;
-        const feedPosts = await Post.find({user: {$in: following}})
+        const feedPosts = await Post
+            .find({
+                user: {
+                    $in: following
+                }
+            })
             .sort({createdAt: -1})
             .populate({path: "user", select: "-password"})
             .populate({path: "comments.user", select: "-password"});
-        if (feedPosts.length <= 0)
+        if (feedPosts.length <= 0) 
             return res
                 .status(200)
                 .json([]);
@@ -311,21 +316,22 @@ export const getFollowingPosts = async (req, res) => {
 
 export const getUserPosts = async (req, res) => {
     try {
-        const { username } = req.params
-        if (!username)
+        const {username} = req.params
+        if (!username) 
             return res
                 .status(400)
                 .json({message: 'Username is required'});
         const user = await User.findOne({username});
-        if (!user)
+        if (!user) 
             return res
                 .status(404)
                 .json({message: 'User not found'});
-        const posts = await Post.find({user: user._id})
+        const posts = await Post
+            .find({user: user._id})
             .sort({createdAt: -1})
             .populate({path: "user", select: "-password"})
             .populate({path: "comments.user", select: "-password"});
-        if (posts.length <= 0)
+        if (posts.length <= 0) 
             return res
                 .status(200)
                 .json([]);
