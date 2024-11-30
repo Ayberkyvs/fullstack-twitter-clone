@@ -1,19 +1,19 @@
 import mongoose from 'mongoose';
-
+import Post from './post.model.js';
 const userSchema = new mongoose.Schema({
     username: {
         type: String,
         required: true,
-        unique: true,
+        unique: true
     },
     fullName: {
         type: String,
-        required: true,
+        required: true
     },
     password: {
         type: String,
         required: true,
-        min: [6, 'Password must be at least 6 characters long'],
+        min: [6, 'Password must be at least 6 characters long']
     },
     email: {
         type: String,
@@ -49,10 +49,25 @@ const userSchema = new mongoose.Schema({
     link: {
         type: String,
         default: ""
-    }
+    },
+    likedPosts: [
+        {
+            type: mongoose.Schema.Types.ObjectId, // ref to Post
+            ref: 'Post',
+            default: []
+        }
+    ]
 }, {timestamps: true});
 
 //! mongoose-hidden plugini password icin eklenebilir.
+
+userSchema.pre('remove', async function (next) {
+    try {
+        await Post.deleteMany({user: this._id}); // Delete all posts of the user
+    } catch (err) {
+        next(err);
+    }
+});
 
 const User = mongoose.model('User', userSchema);
 
