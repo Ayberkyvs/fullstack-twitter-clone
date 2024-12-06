@@ -1,5 +1,5 @@
 import { MenuItems } from "./types";
-import { GoHome, GoPerson, GoBell, GoBookmark, GoGear, GoPersonFill, GoBookmarkFill} from "react-icons/go";
+import { GoHome, GoPerson, GoBell, GoBookmark, GoPersonFill, GoBookmarkFill} from "react-icons/go";
 import React from "react";
 import { GoHomeFill, GoBellFill } from "react-icons/go";
 import { MdOutlineExplore, MdExplore } from "react-icons/md";

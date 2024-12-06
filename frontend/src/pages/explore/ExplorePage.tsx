@@ -6,7 +6,7 @@ import RightPanelSkeleton from '../../components/skeletons/RightPanelSkeleton';
 import User from '../../components/ui/User';
 
 const ExplorePage = () => {
-  const isLoading = false;
+  const isLoading = true;
     const [exploreType, setExploreType] = React.useState("trending");
     const tabs = [
         { id: "trending", label: "Trending" },

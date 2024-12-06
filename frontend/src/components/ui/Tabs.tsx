@@ -7,7 +7,7 @@ const Tabs = ({activeTab, setActiveTab, tabs, className} : {
     return (
         <div
         role="tablist"
-        className={`sticky top-0 flex w-full items-end justify-between tabs tabs-bordered h-[54px] bg-base-100 z-[1] ${className}`}
+        className={`sticky top-[-2px] flex w-full items-end justify-between tabs tabs-bordered h-[54px] bg-base-100 z-[1] ${className}`}
     >
         {tabs.map((tab) => (
             <a

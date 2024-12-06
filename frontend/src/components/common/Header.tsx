@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import Logo from "../svgs/Logo";
 import { BsThreeDots } from "react-icons/bs";
 import User from "../ui/User";
@@ -6,6 +6,7 @@ import { AUTH_USER } from "../../utils/db/dummy";
 import React from "react";
 import { menuItems } from "../../utils/config";
 import Search from "../ui/Search";
+import { GoArrowLeft } from "react-icons/go";
 
 const Header = () => {
     const [isBorderVisible, setIsBorderVisible] = React.useState(false);
@@ -13,7 +14,7 @@ const Header = () => {
     const location = useLocation();
     const pathname = location.pathname.replace("/", ""); // "/" kaldırılır
     const isRoot = pathname === "";
-
+    const navigate = useNavigate();
     // Drawer açılma durumunu kontrol et
     React.useEffect(() => {
         document.documentElement.style.overflow = isDrawerOpen ? "hidden" : "auto";
@@ -21,8 +22,9 @@ const Header = () => {
 
     // Border görünürlüğünü pathname'e göre ayarla
     React.useEffect(() => {
-        setIsBorderVisible(pathname !== "" && pathname !== "explore");
-    }, [pathname]);
+        setIsBorderVisible(pathname !== "" && pathname !== "explore" && pathname !== "profile");
+        // setIsDrawerOpen(true);
+    }, [location.pathname]);
 
     // Sayfa başlığını belirleyen işlev
     const findCorrectPageHeading = () => {
@@ -30,7 +32,17 @@ const Header = () => {
             case "explore":
                 return <Search className="ml-2 w-full" />;
             case "profile":
-                return "Profile";
+                return(
+                <>
+                <button onClick={()=> navigate(-1)} title="Previous Page" type="button" className="btn btn-circle btn-ghost">
+                    <GoArrowLeft className="w-[1.3em] h-[1.3em]" />
+                    </button>
+                    <div className="flex flex-col items-start w-fit h-fit">
+                    <p className="text-xl font-bold">John Doe</p>
+                    <span className='text-sm text-neutral'>99 posts</span>
+                </div>
+                </>
+                );
             case "login":
                 return "Login";
             case "signup":
@@ -56,9 +68,10 @@ const Header = () => {
                 {/* Page content here */}
                 <div
                     className={`relative flex xs:hidden navbar bg-base-100 px-3 ${
-                        isBorderVisible ? "border-b border-base-content/10" : ""
+                        isBorderVisible ? "border-b border-base-content/10" : "border-b-0"
                     }`}
                 >
+                {pathname !== "profile" &&
                     <label
                         htmlFor="my-drawer"
                         tabIndex={0}
@@ -72,6 +85,7 @@ const Header = () => {
                             />
                         </div>
                     </label>
+                }
                     {isRoot && (
                         <div className="absolute top-[50%] left-[50%] transform -translate-x-1/2 -translate-y-1/2">
                             <Link to="/">
@@ -109,13 +123,14 @@ const Header = () => {
                     </li>
                     {Object.keys(menuItems).map((key) => {
                         if (!menuItems[key].inDock) {
+                            const isActive = menuItems[key].link === location.pathname;
                             return (
                                 <li key={key} className="w-full">
                                     <Link
                                         to={menuItems[key].link}
                                         className="flex justify-start items-center btn btn-ghost text-lg gap-5 rounded-lg w-full font-normal p-0"
                                     >
-                                        {menuItems[key].icon}
+                                        {isActive ? menuItems[key].activeIcon : menuItems[key].icon}
                                         <span className="flex">
                                             {menuItems[key].text}
                                         </span>

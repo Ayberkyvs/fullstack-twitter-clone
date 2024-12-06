@@ -2,26 +2,22 @@ import Post from "./Post";
 import PostSkeleton from "../skeletons/PostSkeleton";
 import { POSTS } from "../../utils/db/dummy";
 
-const Posts = ({feedType}: {feedType: string}) => {
-	const isLoading = true;
+const Posts = ({feedType}: {feedType?: string}) => {
+	const isLoading = false;
 
 	return (
 		<>
-			{isLoading && (
-				<div className='flex flex-col justify-center'>
-					<PostSkeleton />
-					<PostSkeleton />
-					<PostSkeleton />
-				</div>
-			)}
+		<div className='flex flex-col justify-center'>
+			{isLoading &&
+				Array.from({ length: 4 }).map((_, index) => (
+					<PostSkeleton key={index} />
+				))
+			}
 			{!isLoading && POSTS?.length === 0 && <p className='text-center my-4'>No posts in this tab. Switch 👻</p>}
-			{!isLoading && POSTS && (
-				<div>
-					{POSTS.map((post) => (
-						<Post key={post._id} post={post} />
-					))}
-				</div>
-			)}
+			{!isLoading && POSTS && POSTS.map((post: any) => (
+				<Post key={post._id} post={post} />
+			))}
+		</div>
 		</>
 	);
 };

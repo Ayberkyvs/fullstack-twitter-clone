@@ -1,17 +1,17 @@
 import RightPanelSkeleton from "../skeletons/RightPanelSkeleton";
 import {USERS_FOR_RIGHT_PANEL, HASHTAGS} from "../../utils/db/dummy";
-import { AUTH_USER } from "../../utils/db/dummy";
-import { BsThreeDots } from "react-icons/bs";
+import { AUTH_USER } from "../../utils/db/dummy";;
 import User from "../ui/User";
 import Search from "../ui/Search";
 import HighlightsSection from "../ui/HighlightsSection";
 import HashtagSkeleton from "../skeletons/HashtagSkeleton";
+import CurrentUser from "../ui/CurrentUser";
 
 const RightPanel = () => {
-	const isLoading = true;
+	const isLoading = false;
     return (
 	<section className='hidden lg:flex flex-col px-3 py-5 gap-5 border-l border-base-content/10'>
-		<User user={AUTH_USER} rightButton={<button title="More" type="button" className="text-lg text-neutral"><BsThreeDots/></button>} />
+		<CurrentUser />
 		<Search />
 		<HighlightsSection title="Live on Twitter"
 		content={
@@ -31,9 +31,12 @@ const RightPanel = () => {
 		<HighlightsSection title="You might like"
 		content={
 			<div className="flex flex-col gap-5">
-				{USERS_FOR_RIGHT_PANEL.slice(0, 4).map(user => (
-					isLoading ? <RightPanelSkeleton />
-					:
+				{isLoading &&
+					Array.from({ length: 4 }).map((_, index) => (
+						<RightPanelSkeleton key={index} />
+					))
+				}
+				{!isLoading && USERS_FOR_RIGHT_PANEL.slice(0, 4).map(user => (
 					<User
 						key={user.username}
 						user={user}
@@ -51,9 +54,12 @@ const RightPanel = () => {
 		<HighlightsSection title="What's happening"
 		content={
 			<div className="flex flex-col gap-5">
-				{HASHTAGS.slice(0, 9).map(hashtag => (
-					isLoading ? <HashtagSkeleton />
-					:
+				{isLoading &&
+					Array.from({ length: 8 }).map((_, index) => (
+						<HashtagSkeleton key={index} />
+					))
+				}
+				{!isLoading && HASHTAGS.slice(0, 9).map(hashtag => (
 					<div className="flex flex-col w-full h-fit">
 						<h6 className="text-base font-bold">{hashtag.tag}</h6>
 						<span className="text-sm text-neutral">{hashtag.usageCount} posts</span>

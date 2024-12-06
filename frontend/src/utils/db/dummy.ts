@@ -32,6 +32,9 @@ export const POSTS: PostType[] = [
 			},
 		],
 		likes: ["6658s891", "6658s892", "6658s893", "6658s894"],
+		likeCount: 4,
+		commentCount: 1,
+		retweetCount: 0,
 	},
 	{
 		_id: "2",
@@ -55,6 +58,9 @@ export const POSTS: PostType[] = [
 			},
 		],
 		likes: ["6658s891", "6658s892", "6658s893", "6658s894"],
+		likeCount: 4,
+		commentCount: 3,
+		retweetCount: 0,
 	},
 	{
 		_id: "3",
@@ -68,6 +74,9 @@ export const POSTS: PostType[] = [
 		},
 		comments: [],
 		likes: ["6658s891", "6658s892", "6658s893", "6658s894", "6658s895", "6658s896"],
+		likeCount: 6,
+		commentCount: 0,
+		retweetCount: 1,
 	},
 	{
 		_id: "4",
@@ -102,6 +111,9 @@ export const POSTS: PostType[] = [
 			"6658s898",
 			"6658s899",
 		],
+		likeCount: 9,
+		commentCount: 1,
+		retweetCount: 0,
 	},
 ];
 

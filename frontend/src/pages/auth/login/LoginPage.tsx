@@ -25,7 +25,7 @@ const LoginPage = () => {
 	};
     let isError = false;
 	return (
-		<div className='w-full mx-auto flex min-h-screen h-fit p-5 sm:px-10 border'>
+		<div className='w-full mx-auto flex min-h-screen h-fit p-5 sm:px-10'>
 			<div className='flex-1 hidden lg:flex items-center justify-center'>
 				<Logo className='lg:w-2/3 fill-base-content' />
 			</div>

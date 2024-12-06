@@ -4,6 +4,7 @@ import { AiOutlineRetweet } from "react-icons/ai";
 import { RiUserFollowFill } from "react-icons/ri";
 import { GoBell } from "react-icons/go";
 import { NOTIFICATIONS } from "../../utils/db/dummy";
+import PageHeading from "../../components/ui/PageHeading";
 
 const NotificationPage = () => {
   const getNotificationMessage = (type: string) => {
@@ -38,9 +39,7 @@ const NotificationPage = () => {
 
   return (
     <>
-    <div className="hidden xs:flex navbar bg-base-100 border-b border-base-content/10">
-      <h1 className="text-xl font-bold">Notifications</h1>
-    </div>
+    <PageHeading title="Notifications"/>
       <div className="w-full h-fit">
       {NOTIFICATIONS.map((notification, index) => {
         return (

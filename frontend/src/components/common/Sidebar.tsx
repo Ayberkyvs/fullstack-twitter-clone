@@ -1,13 +1,14 @@
 import { Link, useLocation } from "react-router-dom";
 import Logo from "../svgs/Logo";
-import { GoSidebarExpand, GoSidebarCollapse} from "react-icons/go";
+import { GoSidebarExpand, GoSidebarCollapse } from "react-icons/go";
 import { menuItems } from "../../utils/config";
 import { IoSend } from "react-icons/io5";
 import Modal from "../ui/Modal";
 
-const Sidebar = ({collapse, setCollapse}: {collapse: boolean, setCollapse: (value: boolean) => void}) => {
+const Sidebar = ({collapse=false, setCollapse}: {collapse: boolean, setCollapse: (value: boolean) => void}) => {
     const location = useLocation();
     let pathname = location.pathname;
+
     return (
     <div className={`hidden xs:flex flex-col w-full h-full py-3 border-r border-base-content/10 gap-5 ${collapse ? "" : "xl:px-5"}`}>
         <Logo className="w-10 h-10 fill-primary mx-4"/>

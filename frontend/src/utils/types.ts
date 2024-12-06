@@ -17,6 +17,9 @@ export type PostType = {
 		user: UserType;
 	}[];
 	likes: string[];
+	commentCount: number;
+	likeCount: number;
+	retweetCount: number;
 };
 
 export type HashtagType = {

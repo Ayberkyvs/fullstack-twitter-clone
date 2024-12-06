@@ -10,20 +10,24 @@ import Dock from "./components/common/Dock"
 import NotificationPage from "./pages/notification/NotificationPage"
 import ProfilePage from "./pages/profile/ProfilePage"
 import ExplorePage from "./pages/explore/ExplorePage"
+import BookmarksPage from "./pages/bookmarks/BookmarksPage"
+import SettingsPage from "./pages/settings/SettingsPage"
 
 function App() {
     const [collapse, setCollapse] = React.useState(false);
+    React.useEffect(() => {
+        const localTheme = localStorage.getItem('theme')
+        document.querySelector('html')?.setAttribute('data-theme', localTheme!)
+    },[]);
     const authUser = true;
     return (
         <> < div className = {
             `${authUser
-                ? `grid grid-cols-1 xs:grid-cols-[minmax(0,70px)_1fr] lg:grid-cols-[minmax(0,70px)_1fr_minmax(0,330px)] xl:grid-cols-[minmax(0,${collapse
-                    ? "70px"
-                    : "330px"})_1fr_minmax(0,330px)]`
+                ? `grid grid-cols-1 xs:grid-cols-[minmax(0,70px)_1fr] lg:grid-cols-[minmax(0,70px)_1fr_minmax(0,330px)] ${collapse ? 'xl:grid-cols-[minmax(0,70px)_1fr_minmax(0,330px)]' : 'xl:grid-cols-[minmax(0,330px)_1fr_minmax(0,330px)]'}`
                 : "flex"} justify-center max-w-screen-2xl w-full h-screen fixed top-0 left-[50%] transform -translate-x-1/2`
         } > {/* Sidebar */
         } {
-            authUser && <> < Sidebar collapse = {
+            authUser && <> <Sidebar collapse = {
                 collapse
             }
             setCollapse = {
@@ -61,9 +65,23 @@ function App() {
                 }
             />
             <Route
+                path="/bookmarks"
+                element={authUser
+                    ? <BookmarksPage />
+                    : <Navigate to="/login"/>
+                }
+            />
+            <Route
                 path="/notifications"
                 element={authUser
                     ? <NotificationPage/>
+                    : <Navigate to="/login"/>
+                }
+            />
+            <Route
+                path="/settings"
+                element={authUser
+                    ? <SettingsPage />
                     : <Navigate to="/login"/>
                 }
             />

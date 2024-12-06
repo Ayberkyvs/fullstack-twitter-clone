@@ -59,7 +59,10 @@ export default {
         },
         "black",
         "coffee",
-        "valentine"
+        "valentine",
+        "aqua",
+        "synthwave",
+        "lemonade",
       ],
     },
   theme: {
