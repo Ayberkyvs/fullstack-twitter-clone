@@ -1,12 +1,10 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import Logo from "../svgs/Logo";
-import { BsThreeDots } from "react-icons/bs";
-import User from "../ui/User";
-import { AUTH_USER } from "../../utils/db/dummy";
 import React from "react";
 import { menuItems } from "../../utils/config";
 import Search from "../ui/Search";
 import { GoArrowLeft } from "react-icons/go";
+import CurrentUser from "../ui/CurrentUser";
 
 const Header = () => {
     const [isBorderVisible, setIsBorderVisible] = React.useState(false);
@@ -104,20 +102,7 @@ const Header = () => {
                 ></label>
                 <ul className="menu flex flex-col gap-2 bg-base-200/100 text-base-content min-h-full w-64 p-4">
                     {/* Sidebar content here */}
-                    <User
-                        user={AUTH_USER}
-                        rightButton={
-                            <li>
-                                <button
-                                    title="More"
-                                    type="button"
-                                    className="text-lg text-neutral"
-                                >
-                                    <BsThreeDots />
-                                </button>
-                            </li>
-                        }
-                    />
+                    <CurrentUser />
                     <li>
                         <br />
                     </li>

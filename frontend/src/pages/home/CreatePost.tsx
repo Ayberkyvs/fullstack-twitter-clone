@@ -2,10 +2,9 @@ import { useRef, useState } from "react";
 import { IoCloseSharp } from "react-icons/io5";
 import { FaRegSmile } from "react-icons/fa";
 import { GoImage } from "react-icons/go";
-import { useToast } from "../../hooks/ToastProvider";
+import toast from "react-hot-toast";
 
 const CreatePost = ({className}: {className:string}) => {
-	const toast = useToast();
 	const [text, setText] = useState("");
 	const [img, setImg] = useState<string | ArrayBuffer | null>(null);
 
@@ -20,7 +19,7 @@ const CreatePost = ({className}: {className:string}) => {
 
 	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
-		toast("success", "Post created successfully");
+		toast.success("Post created successfully");
 	};
 
 	const handleImgChange = (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -13,6 +13,9 @@ import RightPanel from "./components/common/RightPanel";
 import React from "react";
 import Header from "./components/common/Header";
 import Dock from "./components/common/Dock";
+import { Toaster } from "react-hot-toast";
+import { useQuery } from "@tanstack/react-query";
+import LoadingSpinner from "./components/common/LoadingSpinner";
 
 
 function App() {
@@ -21,9 +24,28 @@ function App() {
     const localTheme = localStorage.getItem("theme");
     document.querySelector("html")?.setAttribute("data-theme", localTheme!);
   }, []);
-  const authUser = true;
+
+  const { data: authUser, isLoading, error, isError } = useQuery({
+    queryKey: ["authUser"],
+    queryFn: async () => {
+      try {
+        const res = await fetch("/api/auth/me");
+        const data = await res.json();
+        if (data.error) return null;
+        if (!res.ok) throw new Error(data.error || "An error occurred while fetching user");
+        return data;
+      } catch (error) {
+        throw error;
+      }
+    },
+    retry: 1,
+  });
+  if (isLoading) return <div className="flex justify-center items-center w-full h-screen"><LoadingSpinner size="lg"/></div>;
   return (
     <>
+      <Toaster
+      position="bottom-center"
+      reverseOrder={false}/>
       <div
         className={`${
           authUser

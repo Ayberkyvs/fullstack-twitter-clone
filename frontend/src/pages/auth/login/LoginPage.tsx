@@ -5,16 +5,47 @@ import Logo from "../../../components/svgs/Logo";
 
 import { FaUser } from "react-icons/fa";
 import { MdPassword } from "react-icons/md";
+import { SignUpFormType } from "../../../utils/types";
+import toast from "react-hot-toast";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const LoginPage = () => {
-	const [formData, setFormData] = useState({
+	const queryClient = useQueryClient();
+	const [formData, setFormData] = useState<Omit<SignUpFormType, "email" | "fullName">>({
 		username: "",
 		password: "",
 	});
 
+	const { mutate:signInMutation, isError, isPending, error } = useMutation({
+		mutationFn: async ({ username, password }: Omit<SignUpFormType, "email" | "fullName">) => {
+			try {
+				const res = await fetch("/api/auth/login", {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({ username, password }),
+				});
+				const data = await res.json();
+				if (!res.ok) throw new Error(data.error || "An error occurred while signing in");
+				return data;
+			} catch (error) {
+				throw error;
+			}
+		},
+		onSuccess: () => {
+			// refetch the Auth user query
+			queryClient.invalidateQueries({queryKey: ["authUser"]});
+		},
+		onError: (error) => {
+			console.error(error);
+			toast.error(error.message);
+		},
+	});
+
 	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
-        console.log(formData)
+        signInMutation(formData);
 	};
 
 	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -23,7 +54,7 @@ const LoginPage = () => {
 			setFormData({ ...formData, [target.name]: target.value });
 		}
 	};
-    let isError = false;
+
 	return (
 		<div className='w-full mx-auto flex min-h-screen h-fit p-5 sm:px-10'>
 			<div className='flex-1 hidden lg:flex items-center justify-center'>
@@ -59,10 +90,10 @@ const LoginPage = () => {
 						/>
 					</label>
 					<button className='btn rounded-full btn-primary text-white' type="submit">
-						Sign In
+						{isPending ? "Signing In" : "Sign In"}
 					</button>
                     <p className="text-xs text-gray-500">By signing in, you agree to the <span className="text-accent">Terms of Service</span> and <span className="text-accent">Privacy Policy</span>, including <span className="text-accent">Cookie Use.</span></p>
-                    {isError && <p className='text-error'>Sorry, something went wrong.</p>}
+                    {isError && <p className='text-error'>{error.message}</p>}
                     <div className='flex flex-col gap-2 mt-4 w-full'>
                         <p className='text-white text-lg mb-2 font-bold'>Don't have an account?</p>
                         <Link to='/signup'>

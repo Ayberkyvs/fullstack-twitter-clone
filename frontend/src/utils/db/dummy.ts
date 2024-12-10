@@ -1,5 +1,4 @@
 import { PostType, UserType, HashtagType, NotificationType } from "../types";
-
 export const AUTH_USER: UserType = {
 	_id: "1",
 	fullName: "John Doe",

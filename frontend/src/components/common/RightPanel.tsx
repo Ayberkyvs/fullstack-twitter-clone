@@ -60,7 +60,7 @@ const RightPanel = () => {
 					))
 				}
 				{!isLoading && HASHTAGS.slice(0, 9).map(hashtag => (
-					<div className="flex flex-col w-full h-fit">
+					<div className="flex flex-col w-full h-fit" key={hashtag._id}>
 						<h6 className="text-base font-bold">{hashtag.tag}</h6>
 						<span className="text-sm text-neutral">{hashtag.usageCount} posts</span>
 					</div>

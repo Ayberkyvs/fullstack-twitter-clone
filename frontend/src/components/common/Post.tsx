@@ -7,19 +7,18 @@ import { GoBookmark, GoLink, GoPerson, GoUpload } from "react-icons/go";
 import { formatDate } from "../../utils/formatDate";
 import DropdownSettings from "../ui/DropdownSettings";
 import { RiUserFollowLine } from "react-icons/ri";
-import { useToast } from "../../hooks/ToastProvider";
+import toast from "react-hot-toast";
 
 const Post = ({post}: {post: PostType}) => {
-  const toast = useToast();
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text)
         .then(() => {
             console.log("Text copied to clipboard:", text);
-            toast("success", "Link copied to clipboard!");
+            toast.success("Link copied to clipboard!");
         })
         .catch(err => {
             console.error("Failed to copy text:", err);
-            toast("error", "Failed to copy link to clipboard!");
+            toast.error("Failed to copy link to clipboard!");
         });
   };
 

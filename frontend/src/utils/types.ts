@@ -1,3 +1,10 @@
+export type SignUpFormType = {
+	email: string;
+	username: string;
+	fullName: string;
+	password: string;
+}
+
 export type UserType = {
 	_id?: string;
 	fullName: string;

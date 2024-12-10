@@ -8,7 +8,7 @@ const User = ({user, rightButton}: {user: UserType, rightButton?: React.ReactNod
             <Link to={`/profile/${user.username}`} className='avatar'>
                 <div className='w-10 h-10 rounded-full'>
                     <img
-                        src={user.profileImg || "/avatar-placeholder.png"}
+                        src={user?.profileImg || "/avatar-placeholder.png"}
                         alt={`Profile picture`}/>
                 </div>
             </Link>

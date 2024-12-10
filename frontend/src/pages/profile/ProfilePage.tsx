@@ -37,7 +37,10 @@ const ProfilePage = () => {
     createdAt: "2024-11-28T17:12:39.022+00:00",
   };
 
-  const handleImgChange = (e: React.ChangeEvent<HTMLInputElement>, state: "coverImg" | "profileImg") => {
+  const handleImgChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    state: "coverImg" | "profileImg"
+  ) => {
     const file = e.target.files && e.target.files[0];
     if (file) {
       const reader = new FileReader();
@@ -81,12 +84,14 @@ const ProfilePage = () => {
               <input
                 type="file"
                 hidden
+                accept="image/*"
                 ref={coverImgRef}
                 onChange={(e) => handleImgChange(e, "coverImg")}
               />
               <input
                 type="file"
                 hidden
+                accept="image/*"
                 ref={profileImgRef}
                 onChange={(e) => handleImgChange(e, "profileImg")}
               />
@@ -94,12 +99,8 @@ const ProfilePage = () => {
               <div className="avatar absolute -bottom-16 left-4">
                 <div className="w-32 rounded-full relative group/avatar">
                   <img
-                    src={
-                      profileImg ||
-                      user?.profileImg ||
-                      "/avatar-placeholder.png"
-                    }
-                    alt="Profile Avatara"
+                    src={profileImg || user?.profileImg || "/avatar-placeholder.png"}
+                    alt="Profile Avatar"
                   />
                   <div className="absolute top-5 right-5 p-1 bg-primary rounded-full group-hover/avatar:opacity-100 opacity-0 cursor-pointer">
                     {isMyProfile && (
@@ -187,11 +188,9 @@ const ProfilePage = () => {
               setActiveTab={setFeedType}
               className="mt-4"
             />
-			<Posts feedType={feedType} />
+            <Posts feedType={feedType} />
           </>
         )}
-
-
       </section>
     </>
   );
