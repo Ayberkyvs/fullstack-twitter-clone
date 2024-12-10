@@ -3,23 +3,55 @@ import { PostType } from "../../utils/types";
 import HeartIcon from "../svgs/HeartIcon";
 import CommentIcon from "../svgs/CommentIcon";
 import RetweetIcon from "../svgs/RetweetIcon";
-import { GoBookmark, GoLink, GoPerson, GoUpload } from "react-icons/go";
+import { GoBookmark, GoLink, GoPerson, GoTrash, GoUpload } from "react-icons/go";
 import { formatDate } from "../../utils/formatDate";
 import DropdownSettings from "../ui/DropdownSettings";
 import { RiUserFollowLine } from "react-icons/ri";
 import toast from "react-hot-toast";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import LoadingSpinner from "./LoadingSpinner";
 
 const Post = ({post}: {post: PostType}) => {
+  const {data: authUser} = useQuery({queryKey: ["authUser"]});
+  const isMyPost = post.user._id === authUser._id;
+  const queryClient = useQueryClient();
+
+  const {mutate: deletePost, isPending} = useMutation({
+    mutationFn: async () => {
+      try {
+        const res = await fetch(`/api/posts/delete/${post._id}`, {
+          method: "DELETE",
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "An error occurred while deleting the post.");
+        return data;
+      } catch (error) {
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      toast.success("Post deleted successfully!");
+      queryClient.invalidateQueries({queryKey: ["posts"]});
+    },
+    onError: (error: Error) => {
+      toast.error(error.message);
+    }
+  });
+
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text)
         .then(() => {
-            console.log("Text copied to clipboard:", text);
             toast.success("Link copied to clipboard!");
         })
-        .catch(err => {
-            console.error("Failed to copy text:", err);
+        .catch(() => {
             toast.error("Failed to copy link to clipboard!");
         });
+  };
+
+  const handleDeletePost = () => {
+    if (isMyPost){
+      deletePost();
+    }
   };
 
   const renderTextWithHashtags = (text: string): (JSX.Element | string)[] => {
@@ -38,9 +70,12 @@ const Post = ({post}: {post: PostType}) => {
       return part;
     });
   };
-
   return (
-    <div className="flex w-full h-fit p-[15px] items-start gap-3 border-b border-base-content/10">
+    <div className="flex w-full h-fit p-[15px] items-start gap-3 border-b border-base-content/10 relative">
+      {isPending &&
+      <div className="flex justify-center items-center absolute top-0 left-0 w-full h-full bg-base-100/60 z-[1]">
+        <LoadingSpinner size="lg" />
+      </div>}
       <Link to={`/profile/${post.user.username}`} className='avatar'>
         <div className='w-10 rounded-full'>
           <img src={post.user.profileImg || "/avatar-placeholder.png"} alt={`Profile picture`}/>
@@ -53,12 +88,11 @@ const Post = ({post}: {post: PostType}) => {
             {/* <span>Badge</span> */}
           </div>
           <div className="flex w-full h-fit justify-between items-center text-neutral">
-            <span>@{post.user.username} · {formatDate(post.user.createdAt)}</span>
+            <span>@{post.user.username} · {formatDate(post.createdAt)}</span>
             <DropdownSettings>
               <li><Link to={`profile/${post.user.username}`}><GoPerson className='w-[1.3em] h-[1.3em]'/> Visit @{post.user.username} profile</Link></li>
-              <li><button type="button"><RiUserFollowLine className='w-[1.3em] h-[1.3em]'/> Follow @{post.user.username}</button></li>
-              {/* If post is user's own post, show delete button */}
-
+              {!isMyPost && <li><button type="button"><RiUserFollowLine className='w-[1.3em] h-[1.3em]'/> Follow @{post.user.username}</button></li>}
+              {isMyPost && <li className="text-error" onClick={handleDeletePost}><button type="button"><GoTrash /> Delete Post</button></li>}
             </DropdownSettings>
           </div>
         </div>

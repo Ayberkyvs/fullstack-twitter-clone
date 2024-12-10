@@ -27,6 +27,7 @@ export type PostType = {
 	commentCount: number;
 	likeCount: number;
 	retweetCount: number;
+	createdAt: string;
 };
 
 export type HashtagType = {
