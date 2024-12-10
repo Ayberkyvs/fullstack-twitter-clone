@@ -3,6 +3,7 @@ import PageHeading from '../../components/ui/PageHeading'
 import Collapse from '../../components/ui/Collapse';
 import { useNavigate } from 'react-router-dom';
 import { GoTrash } from "react-icons/go";
+import Modal from '../../components/ui/Modal';
 
 const SettingsPage = () => {
     const [theme, setTheme] = React.useState(localStorage.getItem("theme") ?? "default");
@@ -92,22 +93,14 @@ const SettingsPage = () => {
                     </div>
             </Collapse>
             <Collapse title='Author'>
-                Ayberk Yavas <a className="link link-info"  href='https://ayberkyavas.com' target='_blank'>My Website</a>
+                Ayberk Yavas <a className="link link-info"  href='https://ayberkyavas.com' target='_blank' rel='noopener'>My Website</a>
             </Collapse>
             <Collapse title='Delete Account'>
-                {/* You can open the modal using document.getElementById('ID').showModal() method */}
-                <button className="btn btn-error" onClick={()=>document.getElementById('account_deletion_model').showModal()} type='button'><GoTrash className='w-[1.3em] h-[1.3em]'/>Delete my account</button>
-                <dialog id="account_deletion_model" className="modal">
-                <div className="modal-box">
-                    <form method="dialog">
-                    {/* if there is a button in form, it will close the modal */}
-                    <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" type='submit'>✕</button>
-                    </form>
+                <Modal modalName="delete-account" trigger={<label className="btn btn-error" role='button' htmlFor='delete-account'><GoTrash className='w-[1.3em] h-[1.3em]'/>Delete my account</label>}>
                     <h3 className="font-bold text-lg">Account Deletion!</h3>
                     <p className="py-4">We destroy all data about you and it cannot be restored. </p>
-                    <button className="btn btn-outline btn-error" onClick={handleAccountDeletion}>yes, just delete stfu</button>
-                </div>
-                </dialog>
+                    <button className="btn btn-outline btn-error" onClick={handleAccountDeletion} type='button'>yes, just delete stfu</button>
+                </Modal>
             </Collapse>
         </div>
     </div>

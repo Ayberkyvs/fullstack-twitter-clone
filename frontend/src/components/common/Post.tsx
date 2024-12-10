@@ -1,16 +1,28 @@
-import { BsThreeDots } from "react-icons/bs";
 import { Link } from "react-router-dom";
 import { PostType } from "../../utils/types";
 import HeartIcon from "../svgs/HeartIcon";
 import CommentIcon from "../svgs/CommentIcon";
 import RetweetIcon from "../svgs/RetweetIcon";
-import { GoBookmark, GoPerson, GoUpload } from "react-icons/go";
+import { GoBookmark, GoLink, GoPerson, GoUpload } from "react-icons/go";
 import { formatDate } from "../../utils/formatDate";
 import DropdownSettings from "../ui/DropdownSettings";
 import { RiUserFollowLine } from "react-icons/ri";
+import { useToast } from "../../hooks/ToastProvider";
 
 const Post = ({post}: {post: PostType}) => {
-  console.log(post)
+  const toast = useToast();
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text)
+        .then(() => {
+            console.log("Text copied to clipboard:", text);
+            toast("success", "Link copied to clipboard!");
+        })
+        .catch(err => {
+            console.error("Failed to copy text:", err);
+            toast("error", "Failed to copy link to clipboard!");
+        });
+  };
+
 
   return (
     <div className="flex w-full h-fit p-[15px] items-start gap-3 border-b border-base-content/10">
@@ -20,7 +32,7 @@ const Post = ({post}: {post: PostType}) => {
         </div>
       </Link>
       <div className="flex flex-col w-full gap-2">
-        <div className="grid grid-rows-2 grid-cols-1 xs:grid-rows-none xs:grid-cols-[auto_1fr] gap-2">
+        <div className="grid grid-rows-2 grid-cols-1 xs:grid-rows-none xs:grid-cols-[auto_1fr] gap-[2px] xs:gap-2">
           <div className="flex w-fit h-fit justify-center items-start gap-[4px] text-base font-bold">
             <h3>{post.user.fullName}</h3>
             {/* <span>Badge</span> */}
@@ -28,8 +40,9 @@ const Post = ({post}: {post: PostType}) => {
           <div className="flex w-full h-fit justify-between items-center text-neutral">
             <span>@{post.user.username} · {formatDate(post.user.createdAt)}</span>
             <DropdownSettings>
-              <li><Link to="profile"><GoPerson className='w-[1.3em] h-[1.3em]'/> Visit @user profile</Link></li>
+              <li><Link to={`profile/${post.user.username}`}><GoPerson className='w-[1.3em] h-[1.3em]'/> Visit @user profile</Link></li>
               <li><a href=""><RiUserFollowLine className='w-[1.3em] h-[1.3em]'/> Follow @user</a></li>
+              {/* If post is user's own post, show delete button */}
             </DropdownSettings>
           </div>
         </div>
@@ -64,7 +77,9 @@ const Post = ({post}: {post: PostType}) => {
             </button>
             <button className="flex items-center gap gap-1 text-neutral text-base"
             type="button" title="Share Post">
-              <GoUpload className="w-[1.3em] h-[1.3em] fill-neutral" />
+              <DropdownSettings dropDownIcon={<GoUpload className="w-[1.3em] h-[1.3em] fill-neutral" />}>
+                <li className="flex" onClick={() => copyToClipboard(`https://x.ayberkyavas.com/posts/${post._id}`)}><p><GoLink className="w-[1.3em] h-[1.3em]"/> Copy Link</p></li>
+              </DropdownSettings>
             </button>
           </div>
         </div>

@@ -2,11 +2,14 @@ import { FcLike } from "react-icons/fc";
 import { FaComment } from "react-icons/fa6";
 import { AiOutlineRetweet } from "react-icons/ai";
 import { RiUserFollowFill } from "react-icons/ri";
-import { GoBell } from "react-icons/go";
+import { GoBell, GoTrash } from "react-icons/go";
 import { NOTIFICATIONS } from "../../utils/db/dummy";
 import PageHeading from "../../components/ui/PageHeading";
+import Modal from "../../components/ui/Modal";
+import LoadingSpinner from "../../components/common/LoadingSpinner";
 
 const NotificationPage = () => {
+  const isLoading = true;
   const getNotificationMessage = (type: string) => {
     switch (type) {
       case 'like':
@@ -37,11 +40,19 @@ const NotificationPage = () => {
     }
   };
 
+  const deleteAllNotifications = () => {};
   return (
     <>
-    <PageHeading title="Notifications"/>
-      <div className="w-full h-fit">
-      {NOTIFICATIONS.map((notification, index) => {
+    <PageHeading title="Notifications" subtitle="All your notifications in one place.">
+      <Modal modalName="delete-notifications" trigger={<label className="btn btn-circle btn-ghost" htmlFor="delete-notifications"><GoTrash title="Delete All Notifications" className="w-[1.3em] h-[1.em]"/></label>}>
+        <h3 className="font-bold text-lg">Delete All Notifications</h3>
+        <p className="py-4">Are you sure you want to delete all notifications? This action cannot be undone, and you will lose all your notification history permanently.</p>
+        <button className="btn btn-outline btn-error" onClick={deleteAllNotifications} type="button">Yes, delete them</button>
+      </Modal>
+    </PageHeading>
+      <div className="flex flex-col justify-center items-center w-full h-fit">
+      {isLoading && <LoadingSpinner size="lg" className="my-4"/>}
+      {!isLoading && NOTIFICATIONS.map((notification, index) => {
         return (
         <div className="text-base-content p-6 w-full mx-auto border-b border-base-content/10" key={index}>
         <div className="flex items-start gap-3">

@@ -21,12 +21,13 @@ const EditProfileModal = ({profileData} :{profileData: any}) => {
 			<button
 				className='btn btn-outline rounded-full btn-sm'
 				onClick={() => (document.getElementById("edit_profile_modal") as HTMLDialogElement)?.showModal()}
+				type="button"
 			>
 				Edit profile
 			</button>
 			<dialog id='edit_profile_modal' className='modal'>
 				<div className='modal-box border rounded-md border-base-content/10 shadow-md'>
-					<h3 className='font-bold text-lg my-3'>Update Profile</h3>
+					<h3 className='font-bold text-lg mb-3'>Update Profile</h3>
 					<form
 						className='flex flex-col gap-4'
 						onSubmit={(e) => {
@@ -96,11 +97,11 @@ const EditProfileModal = ({profileData} :{profileData: any}) => {
 							name='link'
 							onChange={handleInputChange}
 						/>
-						<button className='btn btn-primary rounded-full btn-sm text-white'>Update</button>
+						<button className='btn btn-primary rounded-full btn-md text-white' type="submit">Update</button>
 					</form>
 				</div>
 				<form method='dialog' className='modal-backdrop'>
-					<button className='outline-none'>close</button>
+					<button className='outline-none' type="submit">close</button>
 				</form>
 			</dialog>
 		</>

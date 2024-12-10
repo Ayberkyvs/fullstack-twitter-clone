@@ -18,8 +18,8 @@ const HomePage = () => {
             <Tabs activeTab={feedType} setActiveTab={setFeedType} tabs={tabs}/>
             <CreatePost className="hidden sm:flex "/>
             <Posts feedType={feedType}/>
-            <Modal modalName="create_post_model_2" className="xs:hidden">
-                <label className="absolute bottom-20 right-3 btn btn-primary font-bold rounded-full w-12 h-12" role="button" htmlFor="create_post_model_2" title="Create Post"><IoSend className="w-full h-full flex"/></label>
+            <Modal modalName="create_post_model_2" className="xs:hidden" trigger={<label className="absolute bottom-20 right-3 btn btn-primary font-bold rounded-full w-12 h-12" role="button" htmlFor="create_post_model_2" title="Create Post"><IoSend className="w-full h-full flex"/></label>}>
+                <CreatePost className="flex"/>
             </Modal>
         </div>
     );

@@ -2,8 +2,10 @@ import { useRef, useState } from "react";
 import { IoCloseSharp } from "react-icons/io5";
 import { FaRegSmile } from "react-icons/fa";
 import { GoImage } from "react-icons/go";
+import { useToast } from "../../hooks/ToastProvider";
 
 const CreatePost = ({className}: {className:string}) => {
+	const toast = useToast();
 	const [text, setText] = useState("");
 	const [img, setImg] = useState<string | ArrayBuffer | null>(null);
 
@@ -18,7 +20,7 @@ const CreatePost = ({className}: {className:string}) => {
 
 	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
-		alert("Post created successfully");
+		toast("success", "Post created successfully");
 	};
 
 	const handleImgChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -73,7 +75,7 @@ const CreatePost = ({className}: {className:string}) => {
 						/>
 						<FaRegSmile className='fill-primary w-5 h-5 cursor-pointer' />
 					</div>
-					<input type='file' hidden ref={imgRef} onChange={handleImgChange} />
+					<input type='file' accept="image/*" hidden ref={imgRef} onChange={handleImgChange} />
 					<button className='btn btn-primary rounded-full btn-sm px-4' type="submit">
 						{isPending ? "Posting..." : "Post"}
 					</button>

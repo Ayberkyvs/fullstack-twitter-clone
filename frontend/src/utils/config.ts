@@ -46,7 +46,7 @@ export const menuItems: MenuItems = {
         icon: React.createElement(GoPerson, { className: "w-[1.3em] h-[1.3em]" }),
         activeIcon: React.createElement(GoPersonFill, { className: "w-[1.3em] h-[1.3em]" }),
         text: "Profile",
-        link: "/profile",
+        link: "/profile/1",
         inDock: false,
     },
     Settings: {
