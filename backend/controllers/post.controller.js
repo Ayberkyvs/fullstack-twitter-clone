@@ -32,7 +32,15 @@ export const createPost = async (req, res) => {
     if (!text && !img)
       return res.status(400).json({ message: "Text or image is required" });
     if (img) {
-      const uploadedResponse = await cloudinary.uploader.upload(img);
+      const uploadedResponse = await cloudinary.uploader.upload(img, {
+        folder: `${currentUserId}/posts`,
+        format: "webp",
+        allowed_formats: ["webp", "png", "jpg", "jpeg"],
+        transformation: [
+          { width: 800, height: 418, crop: "limit", quality: "auto" },
+          { fetch_format: "auto" },
+        ],
+      });
       img = uploadedResponse.secure_url;
     }
     const newPost = new Post({
@@ -75,31 +83,24 @@ export const deletePost = async (req, res) => {
         .status(401)
         .json({ message: "You are not authorized to delete this post" });
     if (post.img) {
-      const imgId = post.img.split("/").pop().split(".")[0];
+      const imgUrl = post.img;
+      const imgPath = imgUrl.split("/").slice(-3).join("/");
+      const imgId = imgPath.split(".")[0];
       await cloudinary.uploader.destroy(imgId);
     }
     const hashtags = await Hashtag.find({ posts: req.params.id });
-    for (const tag of hashtags) {
-      //! 2 tane gereksiz find islemi yapiliyor.
-      const updatedTag = await Hashtag.findOneAndUpdate(
-        {
-          _id: tag._id,
+    const bulkOperations = hashtags.map((tag) => ({
+      updateOne: {
+        filter: { _id: tag._id },
+        update: {
+          $pull: { posts: req.params.id },
+          $inc: { usageCount: -1 },
         },
-        {
-          $pull: {
-            posts: req.params.id,
-          },
-          $inc: {
-            usageCount: -1,
-          },
-        },
-        { new: true }
-      );
-      console.log("Updated Tag: ", updatedTag);
-      if (updatedTag.usageCount <= 0) {
-        await Hashtag.deleteOne({ _id: updatedTag._id });
-      }
-    }
+      },
+    }));
+    await Hashtag.bulkWrite(bulkOperations);
+    await Hashtag.deleteMany({ usageCount: { $lte: 0 } });
+
     await Post.findByIdAndDelete(req.params.id);
     res.status(200).json({ message: "Post deleted successfully" });
   } catch (error) {

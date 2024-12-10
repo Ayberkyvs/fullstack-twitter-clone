@@ -8,19 +8,21 @@ import postRoutes from './routes/post.routes.js';
 import notificationRoutes from './routes/notification.routes.js';
 
 import { connectDB } from './db/connectDB.js';
+dotenv.config();
 
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,
     api_secret: process.env.CLOUDINARY_API_SECRET,
+    secure: true,
 });
-dotenv.config();
+
 const app = express();
 const PORT = process.env.PORT || 8000;
 
-app.use(express.json()); // to parse json data
-app.use(express.urlencoded({ extended: true })); // to parse form data
-app.use(cookieParser()); // to parse cookies
+app.use(express.json({limit: '2mb'}));
+app.use(express.urlencoded({ extended: true }, {limit: '2mb'}));
+app.use(cookieParser());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);

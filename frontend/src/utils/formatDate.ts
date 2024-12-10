@@ -11,7 +11,9 @@ export const formatDate = (dateString: string) => {
   const diffInDays = Math.floor(diffInHours / 24);
   const diffInWeeks = Math.floor(diffInDays / 7);
 
-  if (diffInMinutes < 60) {
+  if (diffInMinutes < 1) {
+    return "just now";
+  } else if (diffInMinutes < 60) {
     return `${diffInMinutes}m`;
   } else if (diffInHours < 24) {
     return `${diffInHours}h`;

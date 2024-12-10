@@ -87,17 +87,23 @@ export const updateUserProfile = async (req, res) => {
 
         if (profileImg) {
             if (user.profileImg) {
-                await cloudinary.uploader.destroy(user.profileImg.split('/').pop().split('.')[0]);
+                const imgUrl = user.profileImg;
+                const imgPath = imgUrl.split("/").slice(-2).join("/");
+                const imgId = imgPath.split(".")[0];
+                await cloudinary.uploader.destroy(imgId);
             }
-            const res = await cloudinary.uploader.upload(profileImg)
+            const res = await cloudinary.uploader.upload(img, {folder:`${currentUserId}`, format: 'webp', allowed_formats: ["webp", "png", "jpg", "jpeg"], transformation: [{quality: "auto"}, {fetch_format: "auto"}]});
             profileImg = res.secure_url;
         }
 
         if (coverImg) {
             if (user.coverImg) {
-                await cloudinary.uploader.destroy(user.coverImg.split('/').pop().split('.')[0]);
+                const imgUrl = user.coverImg;
+                const imgPath = imgUrl.split("/").slice(-2).join("/");
+                const imgId = imgPath.split(".")[0];
+                await cloudinary.uploader.destroy(imgId);
             }
-            const res = await cloudinary.uploader.upload(coverImg)
+            const res = await cloudinary.uploader.upload(img, {folder:`${currentUserId}`, format: 'webp', allowed_formats: ["webp", "png", "jpg", "jpeg"], transformation: [{quality: "auto"}, {fetch_format: "auto"}]});
             coverImg = res.secure_url;
         }
 

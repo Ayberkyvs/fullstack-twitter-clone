@@ -55,10 +55,8 @@ const Post = ({post}: {post: PostType}) => {
   };
 
   const renderTextWithHashtags = (text: string): (JSX.Element | string)[] => {
-    // Metni parçalara ayır
     const parts = text.split(/(\s*#[^\s#]+\s*)/g);
     return parts.map((part, index) => {
-      // Eğer parça hashtag ise, span içine al
       if (/^\s*#[^\s#]+\s*$/.test(part)) {
         return (
           <span key={index} className="text-blue-500">
@@ -66,7 +64,6 @@ const Post = ({post}: {post: PostType}) => {
           </span>
         );
       }
-      // Hashtag değilse olduğu gibi bırak
       return part;
     });
   };
@@ -99,7 +96,7 @@ const Post = ({post}: {post: PostType}) => {
         {post.text && <p>{renderTextWithHashtags(post.text)}</p>}
         {post.img &&
         <div className="w-full h-fit">
-          <img src={post.img} className="w-fit h-fit max-h-[500px] object-cover rounded border border-neutral/30" alt="Post" />
+          <img src={post.img} className="w-fit max-w-full h-fit max-h-[418px] object-fit rounded border border-neutral/30" alt="Post" />
         </div>
         }
         <div className="flex justify-between items-center w-full h-fit fill-neutral pt-2">
