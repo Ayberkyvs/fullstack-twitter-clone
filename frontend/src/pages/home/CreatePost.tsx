@@ -14,7 +14,7 @@ const CreatePost = ({className}: {className:string}) => {
 	const isError = false;
 
 	const data = {
-		profileImg: "/avatars/male1.png",
+		profileImg: "/avatar-placeholder.png",
 	};
 
 	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {

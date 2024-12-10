@@ -22,6 +22,22 @@ const Post = ({post}: {post: PostType}) => {
         });
   };
 
+  const renderTextWithHashtags = (text: string): (JSX.Element | string)[] => {
+    // Metni parçalara ayır
+    const parts = text.split(/(\s*#[^\s#]+\s*)/g);
+    return parts.map((part, index) => {
+      // Eğer parça hashtag ise, span içine al
+      if (/^\s*#[^\s#]+\s*$/.test(part)) {
+        return (
+          <span key={index} className="text-blue-500">
+            {part}
+          </span>
+        );
+      }
+      // Hashtag değilse olduğu gibi bırak
+      return part;
+    });
+  };
 
   return (
     <div className="flex w-full h-fit p-[15px] items-start gap-3 border-b border-base-content/10">
@@ -39,13 +55,14 @@ const Post = ({post}: {post: PostType}) => {
           <div className="flex w-full h-fit justify-between items-center text-neutral">
             <span>@{post.user.username} · {formatDate(post.user.createdAt)}</span>
             <DropdownSettings>
-              <li><Link to={`profile/${post.user.username}`}><GoPerson className='w-[1.3em] h-[1.3em]'/> Visit @user profile</Link></li>
-              <li><a href=""><RiUserFollowLine className='w-[1.3em] h-[1.3em]'/> Follow @user</a></li>
+              <li><Link to={`profile/${post.user.username}`}><GoPerson className='w-[1.3em] h-[1.3em]'/> Visit @{post.user.username} profile</Link></li>
+              <li><button type="button"><RiUserFollowLine className='w-[1.3em] h-[1.3em]'/> Follow @{post.user.username}</button></li>
               {/* If post is user's own post, show delete button */}
+
             </DropdownSettings>
           </div>
         </div>
-        {post.text && <p>{post.text}</p>}
+        {post.text && <p>{renderTextWithHashtags(post.text)}</p>}
         {post.img &&
         <div className="w-full h-fit">
           <img src={post.img} className="w-fit h-fit max-h-[500px] object-cover rounded border border-neutral/30" alt="Post" />

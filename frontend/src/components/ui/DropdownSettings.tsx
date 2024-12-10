@@ -4,7 +4,7 @@ const DropdownSettings = ({buttonClassName, dropDownIcon=<BsThreeDots/>, childre
   return (
     <div className="dropdown dropdown-bottom dropdown-end">
         <div tabIndex={0} role="button" className={`m-1 ${buttonClassName}`}>{dropDownIcon}</div>
-        <ul tabIndex={0} className="dropdown-content menu rounded-box z-[1] w-52 p-2 shadow bg-base-200">
+        <ul tabIndex={0} className="dropdown-content menu rounded-box z-[1] w-fit min-w-52 p-2 shadow bg-base-200 text-sm xs:text-base text-base-content">
             {children}
         </ul>
     </div>

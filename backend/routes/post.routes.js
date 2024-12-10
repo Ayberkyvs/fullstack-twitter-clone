@@ -1,10 +1,10 @@
 import express from 'express';
 import { protectRoute } from '../middlewares/protectRoute.js';
-import { commentOnPost, createPost, deletePost, likeUnlikePost, getAllPosts, getLikedPosts, getFollowingPosts, getUserPosts, getPostById } from '../controllers/post.controller.js';
+import { commentOnPost, createPost, deletePost, likeUnlikePost, getAllPosts, getLikedPosts, getFollowingPosts, getUserPosts } from '../controllers/post.controller.js';
 
 const router = express.Router();
 
-router.get('/:id', protectRoute, getPostById);
+// router.get('/:id', protectRoute, getPostById);
 router.get('/all', protectRoute, getAllPosts);
 router.get('/following', protectRoute, getFollowingPosts);
 router.get('/likes/:id', protectRoute, getLikedPosts);

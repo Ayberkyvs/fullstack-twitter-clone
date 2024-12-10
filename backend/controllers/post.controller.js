@@ -5,21 +5,21 @@ import User from "../models/user.model.js";
 import Notification from "../models/notification.model.js";
 import { v2 as cloudinary } from "cloudinary";
 
-export const getPostById = async (req, res) => {
-  const postId = req.params.id;
-  try {
-    if (!postId)
-      return res.status(400).json({ message: "Post ID is required" });
-    const post = await Post.findById(postId)
-      .populate({ path: "user", select: "-password" })
-      .populate({ path: "comments.user", select: "-password" });
-    if (!post) return res.status(404).json({ message: "Post not found" });
-    res.status(200).json(post);
-  } catch (error) {
-    console.error("Error in getPostById controller: " + error.message);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-};
+// export const getPostById = async (req, res) => {
+//   const postId = req.params.id;
+//   try {
+//     if (!postId)
+//       return res.status(400).json({ message: "Post ID is required" });
+//     const post = await Post.findById(postId)
+//       .populate({ path: "user", select: "-password" })
+//       .populate({ path: "comments.user", select: "-password" });
+//     if (!post) return res.status(404).json({ message: "Post not found" });
+//     res.status(200).json(post);
+//   } catch (error) {
+//     console.error("Error in getPostById controller: " + error.message);
+//     res.status(500).json({ error: "Internal Server Error" });
+//   }
+// };
 
 export const createPost = async (req, res) => {
   try {

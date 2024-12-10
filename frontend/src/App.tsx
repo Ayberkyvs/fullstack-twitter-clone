@@ -96,7 +96,7 @@ function App() {
               element={authUser ? <SettingsPage /> : <Navigate to="/login" />}
             />
             <Route
-              path="/profile/:username"
+              path="/:username"
               element={authUser ? <ProfilePage /> : <Navigate to="/login" />}
             />
           </Routes>
