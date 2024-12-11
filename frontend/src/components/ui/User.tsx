@@ -9,7 +9,7 @@ const User = ({user, rightButton}: {user: UserType, rightButton?: React.ReactNod
                 <div className='w-10 h-10 rounded-full'>
                     <img
                         src={user?.profileImg || "/avatar-placeholder.png"}
-                        alt={`Profile picture`}/>
+                        alt={`${user?.fullName || "User"} profile picture`}/>
                 </div>
             </Link>
 			<div
