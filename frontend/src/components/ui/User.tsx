@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom'
 
 const User = ({user, rightButton}: {user: UserType, rightButton?: React.ReactNode}) => {
   return (
-    <div className="grid grid-cols-[auto_1fr_auto] items-center w-full h-fit max-h-[50px] gap-3">
+    <div className="grid grid-cols-[auto_1fr_auto] items-center w-full h-fit gap-3">
             <Link to={`/profile/${user.username}`} className='avatar'>
                 <div className='w-10 h-10 rounded-full'>
                     <img

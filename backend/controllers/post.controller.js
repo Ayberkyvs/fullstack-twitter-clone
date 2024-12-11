@@ -29,7 +29,7 @@ export const createPost = async (req, res) => {
 
     const user = await User.findById(currentUserId);
     if (!user) return res.status(404).json({ message: "User not found" });
-    if (!text && !img)
+    if ((!text && !img) || (text && text.trim() === "" && !img))
       return res.status(400).json({ message: "Text or image is required" });
     if (img) {
       const uploadedResponse = await cloudinary.uploader.upload(img, {

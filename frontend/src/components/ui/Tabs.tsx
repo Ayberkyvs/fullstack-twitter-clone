@@ -1,6 +1,6 @@
 const Tabs = ({activeTab, setActiveTab, tabs, className} : {
     activeTab: string,
-    setActiveTab: (type : string) => void,
+    setActiveTab: (type : string | any) => void,
     tabs: {id: string, label: string}[],
     className?: string
 }) => {

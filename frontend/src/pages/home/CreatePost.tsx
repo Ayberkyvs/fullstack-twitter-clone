@@ -24,7 +24,7 @@ const CreatePost = ({ className }: { className: string }) => {
           body: JSON.stringify({ text, img }),
         });
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "An error occurred while creating the post.");
+        if (!res.ok) throw new Error(data.message || "An error occurred while creating the post.");
         return data;
       } catch (error) {
         throw error;
@@ -40,7 +40,11 @@ const CreatePost = ({ className }: { className: string }) => {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    createPost({ text, img });
+    if ((!text && !img) || (text && text.trim() === "" && !img)) {
+      toast.error("Please write something or upload an image to post.");
+    }else {
+      createPost({ text, img });
+    }
   };
 
   const handleImgChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -67,7 +71,7 @@ const CreatePost = ({ className }: { className: string }) => {
       </div>
       <form className="flex flex-col gap-2 w-full h-full" onSubmit={handleSubmit}>
         <textarea
-          className="textarea w-full h-[60px] p-0 text-base resize-none border-none focus:outline-none placeholder:text-neutral"
+          className="textarea w-full h-[60px] p-0 text-base resize-none border-none focus:outline-none placeholder:text-neutral rounded-none"
           placeholder="What is happening?!"
           value={text}
           onChange={(e) => setText(e.target.value)}

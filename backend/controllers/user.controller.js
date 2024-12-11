@@ -24,7 +24,7 @@ export const getSuggestedUsers = async (req, res) => {
         const currentUserId = req.user._id;
         const usersFollowedByMe = await User.findById(currentUserId).select('following');
         const usersToExclude = [...(usersFollowedByMe.following || []).map(user => user._id), currentUserId];
-        const suggestedUsers = await User.find({_id: {$nin: usersToExclude}}).select('-password').limit(10);
+        const suggestedUsers = await User.find({_id: {$nin: usersToExclude}}).select('-password').limit(20);
         //! User.find never returns null, it returns an empty array if no users are found
         if (suggestedUsers.length === 0) return res.status(404).json({error: 'No users found'});
         res.status(200).json(suggestedUsers);
