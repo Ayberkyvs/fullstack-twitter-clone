@@ -137,7 +137,6 @@ export const deletePost = async (req, res) => {
       }
     }
 
-
     await Post.findByIdAndDelete(req.params.id);
     res.status(200).json({ message: "Post deleted successfully" });
   } catch (error) {
@@ -239,13 +238,13 @@ export const commentOnPost = async (req, res) => {
 
 export const getAllPosts = async (req, res) => {
   try {
-    const posts = await Post.find({type: "original"})
+    const posts = await Post.find({ type: "original" })
       .select("-likes -childPosts")
       .sort({ createdAt: -1 })
-      .populate({ path: "user", select: "-password" })
+      .populate({ path: "user", select: "-password" });
 
     if (posts.length <= 0) return res.status(200).json([]);
-    console.log(posts)
+    console.log(posts);
     res.status(200).json(posts);
   } catch (error) {
     console.error("Error in getAllPosts controller: " + error.message);
@@ -316,3 +315,5 @@ export const getUserPosts = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+export const repostPost = async (req, res) => {};

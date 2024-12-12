@@ -22,7 +22,7 @@ export type PostType = {
 	img?: string;
 	user: UserType;
 	parentPost: string;
-	type: "original" | "retweet" | "reply";
+	type: "original" | "repost" | "reply";
 	comments: {
 		_id: string;
 		text: string;
@@ -31,7 +31,7 @@ export type PostType = {
 	likes: object[];
 	replyCount: number;
 	likeCount: number;
-	retweetCount: number;
+	repostCount: number;
 	createdAt: string;
 };
 

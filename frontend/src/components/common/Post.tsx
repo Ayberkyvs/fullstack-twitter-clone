@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { PostType, UserType } from "../../utils/types";
 import HeartIcon from "../svgs/HeartIcon";
 import CommentIcon from "../svgs/CommentIcon";
-import RetweetIcon from "../svgs/RetweetIcon";
+import RepostIcon from "../svgs/RepostIcon";
 import {
   GoBookmark,
   GoLink,
@@ -236,8 +236,8 @@ const Post = ({ post }: { post: PostType }) => {
               }`}
               type="button"
             >
-              <RetweetIcon className="w-[1.3em] h-[1.3em]" />
-              {post.retweetCount}
+              <RepostIcon className="w-[1.3em] h-[1.3em]" />
+              {post.repostCount}
             </button>
             <button
               className={`flex items-center gap gap-1 text-base hover:text-error ${

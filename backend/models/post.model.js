@@ -9,7 +9,7 @@ const likeSchema = new mongoose.Schema({
     }
 }, { timestamps: true });
 
-const POST_TYPES = ['original', 'retweet', 'reply'];
+const POST_TYPES = ['original', 'repost', 'reply'];
 
 
 const postSchema = new mongoose.Schema(
@@ -54,7 +54,7 @@ const postSchema = new mongoose.Schema(
         },
       ],
       // Retweet count
-      retweetCount: {
+      repostCount: {
         type: Number,
         default: 0,
       },
