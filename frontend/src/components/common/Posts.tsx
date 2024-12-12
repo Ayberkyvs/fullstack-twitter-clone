@@ -39,19 +39,17 @@ const Posts = ({feedType}: {feedType?: string}) => {
 		refetch();
 	},[feedType, refetch]);
 	return (
-		<>
-		<div className='flex flex-col justify-center'>
-			{(isLoading || isRefetching) &&
-				Array.from({ length: 4 }).map((_, index) => (
-					<PostSkeleton key={index} />
-				))
-			}
-			{(!isLoading && !isRefetching) && posts?.length === 0 && <p className='text-center my-4'>No posts in this tab. Switch 👻</p>}
-			{(!isLoading && !isRefetching) && posts && posts.map((post: any) => (
-				<Post key={post._id} post={post} />
-			))}
-		</div>
-		</>
+	<div className='flex flex-col justify-center'>
+		{(isLoading || isRefetching) &&
+			Array.from({ length: 4 }).map((_, index) => (
+				<PostSkeleton key={index} />
+			))
+		}
+		{(!isLoading && !isRefetching) && posts?.length === 0 && <p className='text-center my-4'>No posts in this tab. Switch 👻</p>}
+		{(!isLoading && !isRefetching) && posts && posts.map((post: any) => (
+			<Post key={post._id.toString()} post={post} />
+		))}
+	</div>
 	);
 };
 export default Posts;

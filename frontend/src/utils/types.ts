@@ -6,11 +6,14 @@ export type SignUpFormType = {
 }
 
 export type UserType = {
-	_id?: string;
+	_id: string;
 	fullName: string;
 	username: string;
 	profileImg: string;
 	createdAt: string;
+	likedPosts: string[];
+	followers: string[];
+	following: string[];
 };
 
 export type PostType = {
@@ -23,7 +26,7 @@ export type PostType = {
 		text: string;
 		user: UserType;
 	}[];
-	likes: string[];
+	likes: object[];
 	commentCount: number;
 	likeCount: number;
 	retweetCount: number;
