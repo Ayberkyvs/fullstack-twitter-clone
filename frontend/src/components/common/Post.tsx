@@ -17,6 +17,8 @@ import toast from "react-hot-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import LoadingSpinner from "./LoadingSpinner";
 import useFollow from "../hooks/useFollow";
+import Modal from "../ui/Modal";
+import CreatePost from "../../pages/home/CreatePost";
 
 const Post = ({ post }: { post: PostType }) => {
   const queryClient = useQueryClient();
@@ -29,6 +31,7 @@ const Post = ({ post }: { post: PostType }) => {
   const isFollowing = authUser?.following.includes(postUserId);
   const isLiked = authUser?.likedPosts.includes(postId);
   const isRetweeted = false;
+  const modalName = `comment_${post._id}_modal`;
 
   const { mutate: deletePost, isPending: isDeleting } = useMutation({
     mutationFn: async () => {
@@ -47,10 +50,23 @@ const Post = ({ post }: { post: PostType }) => {
       }
     },
     onSuccess: () => {
-      toast.success("Post deleted successfully!");
-      queryClient.invalidateQueries({ queryKey: ["posts"] });
-      //? Sadece silinen post hashtag iceriyorsa trending query'sini guncelle
-      queryClient.invalidateQueries({ queryKey: ["trending"] });
+      queryClient.setQueryData(["posts"], (oldData: PostType[]) => {
+        if (post.type === "reply") {
+          const updatedData = oldData
+            .map((p) => {
+              if (p._id === post.parentPost) {
+                toast.success(`You deleted your reply to ${p.user.username}'s post successfully`);
+                return { ...p, replyCount: p.replyCount - 1 };
+              }
+              return p;
+            })
+            .filter((p) => p._id !== post._id); // Silinen postu listeden çıkar
+          return updatedData;
+        }
+        // Eğer type "original" ise, sadece postu sil
+        toast.success("You deleted your post successfully");
+        return oldData.filter((p) => p._id !== post._id); // Silinen postu listeden çıkar
+      });
     },
     onError: (error: Error) => {
       toast.error(error.message);
@@ -109,6 +125,7 @@ const Post = ({ post }: { post: PostType }) => {
     const parts = text.split(/(\s*#[^\s#]+\s*)/g);
     return parts.map((part, index) => {
       if (/^\s*#[^\s#]+\s*$/.test(part)) {
+        queryClient.invalidateQueries({ queryKey: ["trending"] });
         return (
           <span key={index} className="text-blue-500">
             {part}
@@ -147,6 +164,7 @@ const Post = ({ post }: { post: PostType }) => {
           <div className="flex w-fit h-fit justify-center items-start gap-[4px] text-base font-bold">
             <h3>{post.user.fullName}</h3>
             {/* <span>Badge</span> */}
+
           </div>
           <div className="flex w-full h-fit justify-between items-center text-neutral">
             <span>
@@ -200,13 +218,18 @@ const Post = ({ post }: { post: PostType }) => {
         )}
         <div className="flex justify-between items-center w-full h-fit fill-neutral pt-2">
           <div className="flex gap-6 xs:gap-10 w-fit h-fit">
-            <button
+            <Modal modalName={modalName} trigger={
+              <label
               className="flex items-center gap gap-1 text-neutral text-base hover:text-primary"
-              type="button"
+              role="button"
+              htmlFor={modalName}
             >
               <CommentIcon className="w-[1.3em] h-[1.3em]" />
-              {post.commentCount}
-            </button>
+              {post.replyCount}
+            </label>
+            }>
+                <CreatePost className="flex-wrap gap-6" type="reply" parentPostId={post._id} />
+            </Modal>
             <button
               className={`flex items-center gap gap-1 text-base hover:text-success ${
                 isRetweeted ? "text-success" : "text-neutral"

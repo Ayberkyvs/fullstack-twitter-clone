@@ -4,6 +4,7 @@ import Post from "../models/post.model.js";
 import User from "../models/user.model.js";
 import Notification from "../models/notification.model.js";
 import { v2 as cloudinary } from "cloudinary";
+import { populate } from "dotenv";
 
 // export const getPostById = async (req, res) => {
 //   const postId = req.params.id;
@@ -25,12 +26,18 @@ export const createPost = async (req, res) => {
   try {
     const { text } = req.body;
     let { img } = req.body;
+    const { type: postType } = req.body;
+    const { parentPostId } = req.body;
     const currentUserId = req.user._id.toString();
 
     const user = await User.findById(currentUserId);
     if (!user) return res.status(404).json({ message: "User not found" });
     if ((!text && !img) || (text && text.trim() === "" && !img))
       return res.status(400).json({ message: "Text or image is required" });
+    if (postType !== "original" && postType !== "reply")
+      return res.status(400).json({ message: "Invalid post type" });
+    if (postType === "reply" && !parentPostId)
+      return res.status(400).json({ message: "Parent post ID is required" });
     if (img) {
       const uploadedResponse = await cloudinary.uploader.upload(img, {
         folder: `${currentUserId}/posts`,
@@ -47,9 +54,21 @@ export const createPost = async (req, res) => {
       user: currentUserId,
       text: text ? text : null,
       img: img ? img : null,
-      type: "original",
+      type: postType,
+      parentPost: postType === "reply" ? parentPostId : null,
     });
+
     const savedPost = await newPost.save();
+
+    if (postType === "reply") {
+      const parentPost = await Post.findById(parentPostId);
+      if (!parentPost)
+        return res.status(404).json({ message: "Parent post not found" });
+      parentPost.childPosts.push(savedPost._id);
+      parentPost.replyCount += 1;
+      await parentPost.save();
+    }
+
     const hashtags = extractHashtags(text);
 
     for (const tag of hashtags) {
@@ -67,7 +86,11 @@ export const createPost = async (req, res) => {
       await hashtag.save();
     }
 
-    res.status(201).json(savedPost);
+    const populatedPost = await Post.findById(savedPost._id)
+      .select("-likes -childPosts")
+      .populate({ path: "user", select: "-password" });
+
+    res.status(201).json(populatedPost);
   } catch (error) {
     console.error("Error in createPost controller: " + error.message);
     res.status(500).json({ error: "Internal Server Error" });
@@ -82,6 +105,7 @@ export const deletePost = async (req, res) => {
       return res
         .status(401)
         .json({ message: "You are not authorized to delete this post" });
+
     if (post.img) {
       const imgUrl = post.img;
       const imgPath = imgUrl.split("/").slice(-3).join("/");
@@ -100,6 +124,19 @@ export const deletePost = async (req, res) => {
     }));
     await Hashtag.bulkWrite(bulkOperations);
     await Hashtag.deleteMany({ usageCount: { $lte: 0 } });
+
+    // Remove the post from the likedPosts array of all users who liked it
+    //await User.updateMany({$pull: {likedPosts: req.params.id}}).exec();
+
+    if (post.type === "reply") {
+      const parentPost = await Post.findById(post.parentPost);
+      if (parentPost) {
+        parentPost.childPosts.pull(post._id);
+        parentPost.replyCount -= 1;
+        await parentPost.save();
+      }
+    }
+
 
     await Post.findByIdAndDelete(req.params.id);
     res.status(200).json({ message: "Post deleted successfully" });
@@ -135,9 +172,11 @@ export const likeUnlikePost = async (req, res) => {
         to: post.user,
         type: "like",
       });
-      const updatedLikes = post.likes.filter((id) => id.toString() !== currentUserId.toString());
+      const updatedLikes = post.likes.filter(
+        (id) => id.toString() !== currentUserId.toString()
+      );
       const updatedLikeCount = post.likeCount;
-      res.status(200).json({updatedLikes, updatedLikeCount});
+      res.status(200).json({ updatedLikes, updatedLikeCount });
     } else {
       //? like the post
       post.likes.push({ user: currentUserId });
@@ -158,7 +197,7 @@ export const likeUnlikePost = async (req, res) => {
 
       const updatedLikes = post.likes;
       const updatedLikeCount = post.likeCount;
-      res.status(200).json({updatedLikes, updatedLikeCount});
+      res.status(200).json({ updatedLikes, updatedLikeCount });
     }
   } catch (error) {
     console.error("Error in likeUnlikePost controller: " + error.message);
@@ -200,12 +239,13 @@ export const commentOnPost = async (req, res) => {
 
 export const getAllPosts = async (req, res) => {
   try {
-    const posts = await Post.find()
+    const posts = await Post.find({type: "original"})
+      .select("-likes -childPosts")
       .sort({ createdAt: -1 })
       .populate({ path: "user", select: "-password" })
-      .populate({ path: "comments.user", select: "-password" });
 
     if (posts.length <= 0) return res.status(200).json([]);
+    console.log(posts)
     res.status(200).json(posts);
   } catch (error) {
     console.error("Error in getAllPosts controller: " + error.message);

@@ -18,16 +18,18 @@ export type UserType = {
 
 export type PostType = {
 	_id: string;
-	text: string;
+	text?: string;
 	img?: string;
 	user: UserType;
+	parentPost: string;
+	type: "original" | "retweet" | "reply";
 	comments: {
 		_id: string;
 		text: string;
 		user: UserType;
 	}[];
 	likes: object[];
-	commentCount: number;
+	replyCount: number;
 	likeCount: number;
 	retweetCount: number;
 	createdAt: string;

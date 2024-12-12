@@ -28,7 +28,7 @@ const Sidebar = ({collapse=false, setCollapse}: {collapse: boolean, setCollapse:
                 })}
                 <li className="w-full mt-5 px-2">
                     <Modal modalName="create_post_model" trigger={<label className="btn btn-primary font-bold rounded-full p-0 py-2 w-full" role="button" htmlFor="create_post_model"><IoSend className={`w-[1.3em] h-[1.3em] flex ${collapse ? "flex" : "xl:hidden"}`}/> <span className={`hidden ${collapse ? "hidden" : "xl:flex text-lg"}`}>Post</span></label>}>
-                        <CreatePost className="flex"/>
+                        <CreatePost className="flex" type="original"/>
                     </Modal>
                 </li>
             </ul>

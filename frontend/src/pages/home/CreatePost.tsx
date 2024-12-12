@@ -4,8 +4,9 @@ import { FaRegSmile } from "react-icons/fa";
 import { GoImage } from "react-icons/go";
 import toast from "react-hot-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { PostType } from "../../utils/types";
 
-const CreatePost = ({ className }: { className: string }) => {
+const CreatePost = ({ className, type = "original", parentPostId }: { className: string; type: "original" | "reply" ; parentPostId?: string}) => {
   const [text, setText] = useState("");
   const [img, setImg] = useState<string | ArrayBuffer | null>(null);
   const imgRef = useRef(null);
@@ -13,15 +14,19 @@ const CreatePost = ({ className }: { className: string }) => {
   const { data: authUser } = useQuery({ queryKey: ["authUser"] });
   const queryClient = useQueryClient();
 
-  const { mutate: createPost, isError, isPending, error } = useMutation({
-    mutationFn: async ({ text, img }: { text: string; img: string | ArrayBuffer | null }) => {
+  const { mutate: createPost, isError, isPending, error} = useMutation({
+    mutationFn: async ({ text, img, type, parentPostId }: { text: string; img: string | ArrayBuffer | null; type: string; parentPostId?: string }) => {
       try {
+        let requestBody: Record<string, any> = { text, img, type };
+        if (type === "reply" && parentPostId) {
+          requestBody.parentPostId = parentPostId;
+        }
         const res = await fetch("/api/posts/create", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ text, img }),
+          body: JSON.stringify(requestBody),
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || "An error occurred while creating the post.");
@@ -30,11 +35,28 @@ const CreatePost = ({ className }: { className: string }) => {
         throw error;
       }
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log("Donen: ", data);
       setText("");
       setImg(null);
-      toast.success("Post created successfully");
-      queryClient.invalidateQueries({ queryKey: ["posts"] });
+      queryClient.setQueryData(["posts"], (oldData: PostType[]) => {
+        if (type === "reply") {
+          const updatedData = oldData.map((p) => {
+            if (p._id === parentPostId) {
+              toast.success(`You replied to ${p.user.username}'s post successfully`);
+              return { ...p, replyCount: p.replyCount + 1 };
+            }
+            return p;
+          });
+          // Yeni postu eklerken güncellenmiş veriyi kullanıyoruz
+          return [data, ...updatedData];
+        }
+        // Eğer type "original" ise, sadece yeni postu ekle
+        toast.success("You posted successfully");
+        return [data, ...oldData];
+      });
+      // update cache
+      // queryClient.invalidateQueries({ queryKey: ["posts"] });
     },
   });
 
@@ -42,8 +64,8 @@ const CreatePost = ({ className }: { className: string }) => {
     e.preventDefault();
     if ((!text && !img) || (text && text.trim() === "" && !img)) {
       toast.error("Please write something or upload an image to post.");
-    }else {
-      createPost({ text, img });
+    } else {
+      createPost({ text, img, type, parentPostId });
     }
   };
 
@@ -59,7 +81,7 @@ const CreatePost = ({ className }: { className: string }) => {
   };
 
   return (
-    <div className={`h-fit min-h-[150px] p-4 items-start gap-4 border-b border-base-content/10 ${className}`}>
+    <div className={`flex w-full h-fit min-h-[150px] p-4 items-start gap-4 ${className}`}>
       <div className="avatar z-[0]">
         <div className="w-12 rounded-full">
           {/* authUser varsa resim ve isim render edilir */}
@@ -72,7 +94,7 @@ const CreatePost = ({ className }: { className: string }) => {
       <form className="flex flex-col gap-2 w-full h-full" onSubmit={handleSubmit}>
         <textarea
           className="textarea w-full h-[60px] p-0 text-base resize-none border-none focus:outline-none placeholder:text-neutral rounded-none"
-          placeholder="What is happening?!"
+          placeholder={type === "reply" ? "Write your reply..." : "What is happening?!"}
           value={text}
           onChange={(e) => setText(e.target.value)}
         />
@@ -105,7 +127,7 @@ const CreatePost = ({ className }: { className: string }) => {
           </div>
           <input type="file" accept="image/*" hidden ref={imgRef} onChange={handleImgChange} />
           <button className="btn btn-primary rounded-full btn-sm px-4" type="submit">
-            {isPending ? "Posting..." : "Post"}
+            {isPending ? "Posting..." : type === "reply" ? "Reply" : "Post"}
           </button>
         </div>
         {isError && <div className="text-error">{error?.message}</div>}

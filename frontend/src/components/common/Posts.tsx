@@ -26,6 +26,7 @@ const Posts = ({feedType}: {feedType?: string}) => {
 					method: "GET",
 				});
 				const data = await res.json();
+				console.log("Posts", data);
 				if (!res.ok) throw new Error(data.error || "An error occurred while fetching posts");
 				return data;
 			} catch (error) {
@@ -39,7 +40,7 @@ const Posts = ({feedType}: {feedType?: string}) => {
 		refetch();
 	},[feedType, refetch]);
 	return (
-	<div className='flex flex-col justify-center'>
+	<div className='flex flex-col justify-center border-t border-base-content/10 '>
 		{(isLoading || isRefetching) &&
 			Array.from({ length: 4 }).map((_, index) => (
 				<PostSkeleton key={index} />
