@@ -82,7 +82,7 @@ const Explore = ({
             />
           ) : (
             <div
-              className="flex flex-col w-full h-fit p-3 hover:bg-base-200"
+              className="flex flex-col w-full h-fit hover:bg-base-200"
               key={item._id}
             >
               <h6 className="text-base font-bold">#{item.tag}</h6>

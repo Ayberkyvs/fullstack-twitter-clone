@@ -29,7 +29,7 @@ const RightPanel = () => {
 			<Link to="/explore?tab=suggested" className="link link-primary text-base mt-2">Show More</Link>
 		</HighlightsSection>
 		<HighlightsSection title="What's happening" className="p-4">
-			<Explore exploreType="trending" limit={5}/>
+			<Explore exploreType="trending" limit={5} className="gap-5"/>
 			<Link to="/explore?tab=trending" className="link link-primary text-base mt-2">Show More</Link>
 		</HighlightsSection>
 

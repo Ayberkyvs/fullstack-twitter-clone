@@ -64,7 +64,10 @@ const CreatePost = ({ className, type = "original", parentPostId }: { className:
     e.preventDefault();
     if ((!text && !img) || (text && text.trim() === "" && !img)) {
       toast.error("Please write something or upload an image to post.");
-    } else {
+    } else if (isPending) {
+      toast.loading("Posting...", { duration: 1500});
+    }
+    else {
       createPost({ text, img, type, parentPostId });
     }
   };
