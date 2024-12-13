@@ -56,7 +56,14 @@ const userSchema = new mongoose.Schema({
             ref: 'Post',
             default: []
         }
-    ]
+    ],
+    repostedPosts: [
+        {
+            type: mongoose.Schema.Types.ObjectId, // ref to Post
+            ref: 'Post',
+            default: []
+        }
+    ],
 }, {timestamps: true});
 
 //! mongoose-hidden plugini password icin eklenebilir.

@@ -277,19 +277,37 @@ export const getLikedPosts = async (req, res) => {
 export const getFollowingPosts = async (req, res) => {
   try {
     const currentUserId = req.user._id;
-    const user = await User.findById(currentUserId);
+    // Kullanıcıyı bul ve repostedPosts ile birlikte getir
+    const user = await User.findById(currentUserId).populate("following");
     if (!user) return res.status(404).json({ message: "User not found" });
-
     const following = user.following;
-    const feedPosts = await Post.find({
-      user: {
-        $in: following,
-      },
+    // 1. Normal postları getir (takip edilen kullanıcıların paylaştığı)
+    const normalPosts = await Post.find({
+      user: { $in: following.map((f) => f._id) },
     })
       .sort({ createdAt: -1 })
-      .populate({ path: "user", select: "-password" })
-      .populate({ path: "comments.user", select: "-password" });
+      .populate({ path: "user", select: "-password" });
+    // 2. RepostedPosts içindeki postları getir ve repost eden kullanıcıyı ekle
+    const repostedPostsPromises = following.map(async (followedUser) => {
+      const repostedPosts = await Post.find({
+        _id: { $in: followedUser.repostedPosts },
+      })
+        .populate({ path: "user", select: "-password" })
+        .lean(); // lean() ile dokümanı düz obje olarak alırız
+      // Reposted postlara repost eden bilgisi ekle
+      repostedPosts.forEach((post) => {
+        post.repostedBy = followedUser; // Repost eden kullanıcı
+      });
+      return repostedPosts;
+    });
+    const repostedPosts = (await Promise.all(repostedPostsPromises)).flat();
+    // 3. Normal ve reposted postları birleştir ve tarih sırasına göre sırala
+    const feedPosts = [...normalPosts, ...repostedPosts].sort(
+      (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+    );
+    // Boşsa boş dizi dön
     if (feedPosts.length <= 0) return res.status(200).json([]);
+    // Feed'i dön
     return res.status(200).json(feedPosts);
   } catch (error) {
     console.error("Error in getFollowingPosts controller: " + error.message);
@@ -316,4 +334,44 @@ export const getUserPosts = async (req, res) => {
   }
 };
 
-export const repostPost = async (req, res) => {};
+export const repostPost = async (req, res) => {
+  try {
+    const currentUserId = req.user._id.toString();
+    const postId = req.params.id;
+
+    if (!postId) {
+      return res.status(400).json({ message: "Post ID is required" });
+    }
+
+    const post = await Post.findById(postId);
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    const user = await User.findById(currentUserId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Check if the post is already reposted
+    const alreadyReposted = user.repostedPosts.includes(postId);
+    if (alreadyReposted) {
+      // If already reposted, remove it
+      user.repostedPosts.pull(postId);
+      await user.save();
+      if (post.repostCount > 0) post.repostCount -= 1;
+      await post.save();
+    } else {
+      // If not reposted, create a new repost
+      user.repostedPosts.push(postId);
+      await user.save();
+      post.repostCount += 1;
+      await post.save();
+    }
+    const updatedRepostCount = post.repostCount;
+    res.status(200).json({ updatedRepostCount });
+  } catch (error) {
+    console.error("Error in repostPost controller: " + error.message);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};

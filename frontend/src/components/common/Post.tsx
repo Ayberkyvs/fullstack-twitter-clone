@@ -30,13 +30,14 @@ const Post = ({ post }: { post: PostType }) => {
   const isMyPost = postUserId === authUser?._id;
   const isFollowing = authUser?.following.includes(postUserId);
   const isLiked = authUser?.likedPosts.includes(postId);
-  const isRetweeted = false;
+  const isReposted = authUser?.repostedPosts.includes(postId);
   const modalName = `comment_${post._id}_modal`;
+  console.log(isReposted)
 
   const { mutate: deletePost, isPending: isDeleting } = useMutation({
     mutationFn: async () => {
       try {
-        const res = await fetch(`/api/posts/delete/${post._id}`, {
+        const res = await fetch(`/api/posts/delete/${postId}`, {
           method: "DELETE",
         });
         const data = await res.json();
@@ -76,7 +77,7 @@ const Post = ({ post }: { post: PostType }) => {
   const { mutate: likePost, isPending: isLiking } = useMutation({
     mutationFn: async () => {
       try {
-        const res = await fetch(`/api/posts/like/${post._id}`, {
+        const res = await fetch(`/api/posts/like/${postId}`, {
           method: "POST",
         });
         const data = await res.json();
@@ -94,8 +95,38 @@ const Post = ({ post }: { post: PostType }) => {
       queryClient.setQueryData(["posts"], (oldData: PostType[]) => {
         return oldData.map((p) => {
           if (p._id === postId) {
-            console.log("asda: " + res.updatedLikeCount);
             return { ...p, likes: updatedLikes, likeCount: updatedLikeCount };
+          }
+          return p;
+        });
+      });
+      queryClient.invalidateQueries({ queryKey: ["authUser"] });
+    },
+    onError: (error: Error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const { mutate: repost, isPending: isReposting } = useMutation({
+    mutationFn: async () => {
+      try {
+        const res = await fetch(`/api/posts/repost/${postId}`, {
+          method: "POST",
+        });
+        const data = await res.json();
+        if (!res.ok)
+          throw new Error(data.message || "An error occurred while reposting.");
+        return data;
+      } catch (error) {
+        console.error(error);
+        throw error;
+      }
+    },
+    onSuccess: (res) => {
+      queryClient.setQueryData(["posts"], (oldData: PostType[]) => {
+        return oldData.map((p) => {
+          if (p._id === postId) {
+            return { ...p, repostCount: res.updatedRepostCount };
           }
           return p;
         });
@@ -143,10 +174,15 @@ const Post = ({ post }: { post: PostType }) => {
     if (isLiking) return;
     likePost();
   };
+  const handleRepost = () => {
+    // repost
+    if (isReposting) return;
+    repost();
+  };
 
   return (
     <div className="flex w-full h-fit p-[15px] items-start gap-3 border-b border-base-content/10 relative hover:bg-base-200/50">
-      {(isDeleting || isLiking) && (
+      {(isDeleting || isLiking || isReposting) && (
         <div className="flex justify-center items-center absolute top-0 left-0 w-full h-full bg-base-100/60 z-[1]">
           <LoadingSpinner size="lg" />
         </div>
@@ -232,9 +268,10 @@ const Post = ({ post }: { post: PostType }) => {
             </Modal>
             <button
               className={`flex items-center gap gap-1 text-base hover:text-success ${
-                isRetweeted ? "text-success" : "text-neutral"
+                isReposted ? "text-success" : "text-neutral"
               }`}
               type="button"
+              onClick={handleRepost}
             >
               <RepostIcon className="w-[1.3em] h-[1.3em]" />
               {post.repostCount}

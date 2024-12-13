@@ -14,6 +14,7 @@ export type UserType = {
 	likedPosts: string[];
 	followers: string[];
 	following: string[];
+	repostedPosts: string[];
 };
 
 export type PostType = {
@@ -22,7 +23,7 @@ export type PostType = {
 	img?: string;
 	user: UserType;
 	parentPost: string;
-	type: "original" | "repost" | "reply";
+	type: "original" | "reply";
 	comments: {
 		_id: string;
 		text: string;

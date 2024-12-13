@@ -4,14 +4,14 @@ import { FaRegSmile } from "react-icons/fa";
 import { GoImage } from "react-icons/go";
 import toast from "react-hot-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { PostType } from "../../utils/types";
+import { PostType, UserType } from "../../utils/types";
 
 const CreatePost = ({ className, type = "original", parentPostId }: { className: string; type: "original" | "reply" ; parentPostId?: string}) => {
   const [text, setText] = useState("");
   const [img, setImg] = useState<string | ArrayBuffer | null>(null);
   const imgRef = useRef(null);
 
-  const { data: authUser } = useQuery({ queryKey: ["authUser"] });
+  const { data: authUser } = useQuery<UserType>({ queryKey: ["authUser"] });
   const queryClient = useQueryClient();
 
   const { mutate: createPost, isError, isPending, error} = useMutation({
@@ -36,7 +36,6 @@ const CreatePost = ({ className, type = "original", parentPostId }: { className:
       }
     },
     onSuccess: (data) => {
-      console.log("Donen: ", data);
       setText("");
       setImg(null);
       queryClient.setQueryData(["posts"], (oldData: PostType[]) => {

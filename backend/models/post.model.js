@@ -9,7 +9,7 @@ const likeSchema = new mongoose.Schema({
     }
 }, { timestamps: true });
 
-const POST_TYPES = ['original', 'repost', 'reply'];
+const POST_TYPES = ['original', 'reply'];
 
 
 const postSchema = new mongoose.Schema(
