@@ -5,6 +5,11 @@ export type SignUpFormType = {
 	password: string;
 }
 
+type repostedPost = {
+	post: string;
+	createdAt: string;
+	updatedAt: string;
+}
 export type UserType = {
 	_id: string;
 	fullName: string;
@@ -14,7 +19,7 @@ export type UserType = {
 	likedPosts: string[];
 	followers: string[];
 	following: string[];
-	repostedPosts: string[];
+	repostedPosts: repostedPost[];
 };
 
 export type PostType = {
@@ -22,7 +27,7 @@ export type PostType = {
 	text?: string;
 	img?: string;
 	user: UserType;
-	parentPost: string;
+	parentPost?: PostType;
 	type: "original" | "reply";
 	comments: {
 		_id: string;
@@ -34,6 +39,7 @@ export type PostType = {
 	likeCount: number;
 	repostCount: number;
 	createdAt: string;
+	repostedBy?: UserType;
 };
 
 export type HashtagType = {

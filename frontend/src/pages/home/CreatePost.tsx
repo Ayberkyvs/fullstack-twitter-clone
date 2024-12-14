@@ -36,17 +36,18 @@ const CreatePost = ({ className, type = "original", parentPostId }: { className:
       }
     },
     onSuccess: (data) => {
+      console.log(data);
       setText("");
       setImg(null);
       queryClient.setQueryData(["posts"], (oldData: PostType[]) => {
         if (type === "reply") {
           const updatedData = oldData.map((p) => {
             if (p._id === parentPostId) {
-              toast.success(`You replied to ${p.user.username}'s post successfully`);
               return { ...p, replyCount: p.replyCount + 1 };
             }
             return p;
           });
+          toast.success('You replied successfully');
           // Yeni postu eklerken güncellenmiş veriyi kullanıyoruz
           return [data, ...updatedData];
         }

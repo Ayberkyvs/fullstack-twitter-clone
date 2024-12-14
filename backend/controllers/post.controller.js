@@ -59,16 +59,6 @@ export const createPost = async (req, res) => {
     });
 
     const savedPost = await newPost.save();
-
-    if (postType === "reply") {
-      const parentPost = await Post.findById(parentPostId);
-      if (!parentPost)
-        return res.status(404).json({ message: "Parent post not found" });
-      parentPost.childPosts.push(savedPost._id);
-      parentPost.replyCount += 1;
-      await parentPost.save();
-    }
-
     const hashtags = extractHashtags(text);
 
     for (const tag of hashtags) {
@@ -86,9 +76,33 @@ export const createPost = async (req, res) => {
       await hashtag.save();
     }
 
-    const populatedPost = await Post.findById(savedPost._id)
+    let populatedPost;
+    if (postType === "reply") {
+      const parentPost = await Post.findById(parentPostId);
+      if (!parentPost)
+        return res.status(404).json({ message: "Parent post not found" });
+      parentPost.childPosts.push(savedPost._id);
+      parentPost.replyCount += 1;
+      await parentPost.save();
+      populatedPost = await Post.findById(savedPost._id)
+      .select("-likes -childPosts")
+      .populate({
+        path: "user",
+        select: "-password"
+      })
+      .populate({
+        path: "parentPost",
+        select: "-likes -childPosts",
+        populate: {
+          path: "user",
+          select: "+username +fullName"
+        }
+      });
+    } else {
+      populatedPost = await Post.findById(savedPost._id)
       .select("-likes -childPosts")
       .populate({ path: "user", select: "-password" });
+    }
 
     res.status(201).json(populatedPost);
   } catch (error) {
@@ -204,41 +218,9 @@ export const likeUnlikePost = async (req, res) => {
   }
 };
 
-export const commentOnPost = async (req, res) => {
-  try {
-    const { text } = req.body;
-    const postId = req.params.id;
-    const currentUserId = req.user._id;
-
-    if (!text)
-      return res.status(400).json({ message: "Text field is required" });
-    const post = await Post.findById(postId);
-    if (!post) return res.status(404).json({ message: "Post not found" });
-    const comment = {
-      user: currentUserId,
-      text,
-    };
-    post.comments.push(comment);
-    post.commentCount += 1;
-    await post.save();
-
-    const notification = new Notification({
-      from: currentUserId,
-      to: post.user,
-      type: "comment",
-    });
-    await notification.save();
-
-    res.status(200).json(post);
-  } catch (error) {
-    console.error("Error in commentOnPost controller: " + error.message);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-};
-
 export const getAllPosts = async (req, res) => {
   try {
-    const posts = await Post.find({ type: "original" })
+    const posts = await Post.find()
       .select("-likes -childPosts")
       .sort({ createdAt: -1 })
       .populate({ path: "user", select: "-password" });
@@ -277,38 +259,60 @@ export const getLikedPosts = async (req, res) => {
 export const getFollowingPosts = async (req, res) => {
   try {
     const currentUserId = req.user._id;
-    // Kullanıcıyı bul ve repostedPosts ile birlikte getir
+    // Find user and populate 'following' field
     const user = await User.findById(currentUserId).populate("following");
     if (!user) return res.status(404).json({ message: "User not found" });
+    
     const following = user.following;
-    // 1. Normal postları getir (takip edilen kullanıcıların paylaştığı)
+    
+    // 1. Get normal posts from users being followed
     const normalPosts = await Post.find({
       user: { $in: following.map((f) => f._id) },
     })
+      .select("-likes -childPosts")
       .sort({ createdAt: -1 })
-      .populate({ path: "user", select: "-password" });
-    // 2. RepostedPosts içindeki postları getir ve repost eden kullanıcıyı ekle
+      .populate({ path: "user", select: "-password" })
+      .populate({ path: "parentPost", select: "-likes -childPosts", populate: { path: "user", select: "+username +fullName" } })
+      .lean(); // Use lean to work with plain JavaScript objects
+    
+    // 2. Get reposted posts and include reposting user info
     const repostedPostsPromises = following.map(async (followedUser) => {
       const repostedPosts = await Post.find({
-        _id: { $in: followedUser.repostedPosts },
+        _id: { $in: followedUser.repostedPosts.map((r) => r.post) },
       })
+        .select("-likes -childPosts")
+        .sort({ createdAt: -1 })
         .populate({ path: "user", select: "-password" })
-        .lean(); // lean() ile dokümanı düz obje olarak alırız
-      // Reposted postlara repost eden bilgisi ekle
+        .lean(); // Use lean for plain objects
+      
+      // Add repostedAt field to each reposted post
       repostedPosts.forEach((post) => {
-        post.repostedBy = followedUser; // Repost eden kullanıcı
+        post.repostedBy = followedUser; // Add reposting user information
+        post.repostedAt = followedUser.repostedPosts.find(r => r.post.toString() === post._id.toString())?.createdAt; // Use repost timestamp if available
+        post.type = "repost"; // Add type field to distinguish reposted posts
       });
+      
       return repostedPosts;
     });
+
     const repostedPosts = (await Promise.all(repostedPostsPromises)).flat();
-    // 3. Normal ve reposted postları birleştir ve tarih sırasına göre sırala
-    const feedPosts = [...normalPosts, ...repostedPosts].sort(
-      (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-    );
-    // Boşsa boş dizi dön
+
+    // 3. Merge normal posts and reposted posts
+    const feedPosts = [...normalPosts, ...repostedPosts];
+
+    // Sort the posts by either createdAt (for normal posts) or repostedAt (for reposted posts)
+    feedPosts.sort((a, b) => {
+      const dateA = a.repostedAt || a.createdAt; // Use repostedAt if present
+      const dateB = b.repostedAt || b.createdAt; // Use repostedAt if present
+      return new Date(dateB) - new Date(dateA); // Compare the dates
+    });
+
+    // If no posts found, return empty array
     if (feedPosts.length <= 0) return res.status(200).json([]);
-    // Feed'i dön
+    
+    // Return the feed posts
     return res.status(200).json(feedPosts);
+    
   } catch (error) {
     console.error("Error in getFollowingPosts controller: " + error.message);
     res.status(500).json({ error: "Internal Server Error" });
@@ -354,20 +358,24 @@ export const repostPost = async (req, res) => {
     }
 
     // Check if the post is already reposted
-    const alreadyReposted = user.repostedPosts.includes(postId);
+    const alreadyReposted = user.repostedPosts.some(repost => repost?.post?.toString() === postId);
+
     if (alreadyReposted) {
       // If already reposted, remove it
-      user.repostedPosts.pull(postId);
+      user.repostedPosts = user.repostedPosts.filter(repost => repost?.post?.toString() !== postId);
       await user.save();
+
       if (post.repostCount > 0) post.repostCount -= 1;
       await post.save();
     } else {
       // If not reposted, create a new repost
-      user.repostedPosts.push(postId);
+      user.repostedPosts.push({ post: postId });
       await user.save();
+
       post.repostCount += 1;
       await post.save();
     }
+
     const updatedRepostCount = post.repostCount;
     res.status(200).json({ updatedRepostCount });
   } catch (error) {
@@ -375,3 +383,4 @@ export const repostPost = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+

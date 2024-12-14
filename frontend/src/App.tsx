@@ -7,7 +7,7 @@ import ExplorePage from "./pages/explore/ExplorePage";
 import BookmarksPage from "./pages/bookmarks/BookmarksPage";
 import SettingsPage from "./pages/settings/SettingsPage";
 
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import Sidebar from "./components/common/Sidebar";
 import RightPanel from "./components/common/RightPanel";
 import React from "react";
@@ -19,13 +19,14 @@ import LoadingSpinner from "./components/common/LoadingSpinner";
 
 
 function App() {
+  const navigate = useNavigate();
   const [collapse, setCollapse] = React.useState(false);
   React.useEffect(() => {
     const localTheme = localStorage.getItem("theme");
     document.querySelector("html")?.setAttribute("data-theme", localTheme!);
   }, []);
 
-  const { data: authUser, isLoading } = useQuery({
+  const { data: authUser, isLoading, isError } = useQuery({
     queryKey: ["authUser"],
     queryFn: async () => {
       try {
@@ -38,9 +39,13 @@ function App() {
         throw error;
       }
     },
-    retry: 1,
+    retry: 2,
+    refetchOnWindowFocus: true,
+    refetchInterval: 1000 * 60 * 5,
   });
+
   if (isLoading) return <div className="flex justify-center items-center w-full h-screen"><LoadingSpinner size="lg"/></div>;
+  if (isError) navigate("/login");
   return (
     <>
       <Toaster
@@ -63,7 +68,7 @@ function App() {
             <Header />
           </>
         )}
-        <main className="overflow-auto scrollbar-hide">
+        <main className="break-words w-full overflow-auto scrollbar-hide">
           <Routes>
             <Route
               path="/"

@@ -1,5 +1,13 @@
 import mongoose from 'mongoose';
 import Post from './post.model.js';
+
+const repostSchema = new mongoose.Schema({
+    post: {
+        type: mongoose.Schema.Types.ObjectId, // ref to Post
+        ref: 'Post',
+    },
+}, {timestamps: true});
+
 const userSchema = new mongoose.Schema({
     username: {
         type: String,
@@ -57,13 +65,7 @@ const userSchema = new mongoose.Schema({
             default: []
         }
     ],
-    repostedPosts: [
-        {
-            type: mongoose.Schema.Types.ObjectId, // ref to Post
-            ref: 'Post',
-            default: []
-        }
-    ],
+    repostedPosts: [repostSchema],
 }, {timestamps: true});
 
 //! mongoose-hidden plugini password icin eklenebilir.
