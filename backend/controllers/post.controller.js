@@ -220,7 +220,7 @@ export const likeUnlikePost = async (req, res) => {
 
 export const getAllPosts = async (req, res) => {
   try {
-    const posts = await Post.find()
+    const posts = await Post.find({type : "original"})
       .select("-likes -childPosts")
       .sort({ createdAt: -1 })
       .populate({ path: "user", select: "-password" });
@@ -383,4 +383,3 @@ export const repostPost = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
-

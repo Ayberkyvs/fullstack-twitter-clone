@@ -35,8 +35,8 @@ const Post = ({ post }: { post: PostType }) => {
   const isLiked = authUser?.likedPosts.includes(postId);
   const isReposted = authUser?.repostedPosts.some((p) => p.post === postId);
   const modalName = `comment_${post._id}_modal`;
-  const isReply = post.type === "reply" && post.parentPost?.user;
-  const isSmall = post.img && post.parentPost && isReply; //! Reply degil quata olcak
+  const isReply:boolean = post.type === "reply" && post.parentPost?.user ? true : false;
+  const isSmall:boolean = post.img && post.parentPost?.img && isReply ? true : false;
   console.log(isReposted);
 
   const { mutate: deletePost, isPending: isDeleting } = useMutation({
@@ -199,7 +199,7 @@ const Post = ({ post }: { post: PostType }) => {
           user={post.user}
           className="flex-shrink-0 w-8 h-8 xs:w-10 xs:h-10"
         />
-        <div className="flex flex-col w-full h-fit gap-1 border">
+        <div className="flex flex-col w-full h-fit gap-1">
           <div className="grid grid-rows-2 grid-cols-1 xs:grid-rows-none xs:grid-cols-[auto_1fr] gap-[2px] xs:gap-2">
             <div className="flex w-fit h-fit justify-center items-start gap-[4px] text-base font-bold">
               <h3>{post.user.fullName}</h3>
@@ -258,7 +258,7 @@ const Post = ({ post }: { post: PostType }) => {
             )}
           </div>
           {isReply && post.parentPost && (
-            <EmbedPost post={post.parentPost} isSmall />
+            <EmbedPost post={post.parentPost} isSmall={isSmall} />
           )}
           <div className="flex justify-between items-center w-full h-fit fill-neutral">
             <div className="flex gap-6 xs:gap-10 w-fit h-fit">

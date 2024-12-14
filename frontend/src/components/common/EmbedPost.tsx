@@ -4,6 +4,7 @@ import { formatDate } from "../../utils/formatDate";
 import renderTextWithHashtags from "../../utils/renderWithHashtags";
 
 const EmbedPost = ({ post, isSmall }: { post: PostType; isSmall: boolean }) => {
+  const {text, img} = post;
   return (
     <Link
       to={`/${post.user.username}/status/${post._id}`}
@@ -34,23 +35,15 @@ const EmbedPost = ({ post, isSmall }: { post: PostType; isSmall: boolean }) => {
           isSmall ? "flex-row" : "flex-col-reverse"
         }`}
       >
-        {post.img && (
-          <div
-            className={`flex-shrink-0 ${
-              isSmall ? "w-24 h-24" : "w-fit h-fit"
-            }`}
-          >
-            <img
-              src={post.img}
-              className={`object-fit rounded border border-neutral/30 w-full h-fit max-w-full ${
-                isSmall ? "max-h-full" : "max-h-[418px]"
-              } `}
-              alt="Post"
-            />
-          </div>
+        {img && (
+          <img
+            src={img}
+            className={`object-fit rounded border border-neutral/30 max-h-[418px] ${isSmall ? "w-24 h-24" : "w-fit h-fit"}`}
+            alt="Post"
+          />
         )}
-        {post.text && (
-          <p className="w-full h-fit break-words overflow-auto">{renderTextWithHashtags(post.text)}</p>
+        {text && (
+          <p className="w-full h-fit break-words overflow-auto">{renderTextWithHashtags(text)}</p>
         )}
       </div>
     </Link>
