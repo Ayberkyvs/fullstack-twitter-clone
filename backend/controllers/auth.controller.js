@@ -66,7 +66,10 @@ export const login = async (req,res)=>{
             profileImg: user.profileImg,
             coverImg: user.coverImg,
         });
-
+        if (!user.repostedPosts) {
+            user.repostedPosts = [];
+            await user.save();
+        }
     } catch (error) {
         console.error("Error in login contoller:"+ error);
         res.status(500).json({error: 'Internal Server Error'});

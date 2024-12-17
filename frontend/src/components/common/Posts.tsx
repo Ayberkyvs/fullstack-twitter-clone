@@ -26,7 +26,6 @@ const Posts = ({feedType}: {feedType?: string}) => {
 					method: "GET",
 				});
 				const data = await res.json();
-				console.log("Posts", data);
 				if (!res.ok) throw new Error(data.error || "An error occurred while fetching posts");
 				return data;
 			} catch (error) {

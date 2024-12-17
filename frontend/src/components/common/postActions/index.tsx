@@ -9,10 +9,6 @@ interface PostActionsProps {
 
 const PostActions = ({ post }: PostActionsProps) => {
   const {
-    follow,
-    isFollowPending,
-    deletePost,
-    isDeleting,
     likePost,
     isLiking,
     repost,
@@ -30,7 +26,7 @@ const PostActions = ({ post }: PostActionsProps) => {
   };
   const handleRepost = () => {
     if (isReposting) return;
-    repost(postId);
+    repost({postId, setIsReposted});
   };
 
   return (

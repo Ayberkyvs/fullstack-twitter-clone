@@ -277,17 +277,17 @@ export const getFollowingPosts = async (req, res) => {
       .select("-likes -childPosts")
       .sort({ createdAt: -1 })
       .populate({ path: "user", select: "-password" })
-      .populate({
-        path: "parentPost",
-        select: "-likes -childPosts",
-        populate: { path: "user", select: "+username +fullName" },
-      })
+      // .populate({
+      //   path: "parentPost",
+      //   select: "-likes -childPosts",
+      //   populate: { path: "user", select: "+username +fullName" },
+      // })
       .lean(); // Use lean to work with plain JavaScript objects
 
     // 2. Get reposted posts and include reposting user info
     const repostedPostsPromises = following.map(async (followedUser) => {
       const repostedPosts = await Post.find({
-        _id: { $in: followedUser.repostedPosts.map((r) => r.post) },
+        _id: { $in: followedUser.repostedPosts.map((r) => r._id) },
       })
         .select("-likes -childPosts")
         .sort({ createdAt: -1 })
@@ -298,7 +298,7 @@ export const getFollowingPosts = async (req, res) => {
       repostedPosts.forEach((post) => {
         post.repostedBy = followedUser; // Add reposting user information
         post.repostedAt = followedUser.repostedPosts.find(
-          (r) => r.post.toString() === post._id.toString()
+          (r) => r._id.toString() === post._id.toString()
         )?.createdAt; // Use repost timestamp if available
         post.type = "repost"; // Add type field to distinguish reposted posts
       });
@@ -322,6 +322,7 @@ export const getFollowingPosts = async (req, res) => {
     if (feedPosts.length <= 0) return res.status(200).json([]);
 
     // Return the feed posts
+    console.log("feed posts", feedPosts);
     return res.status(200).json(feedPosts);
   } catch (error) {
     console.error("Error in getFollowingPosts controller: " + error.message);
@@ -353,7 +354,7 @@ export const repostPost = async (req, res) => {
     const currentUserId = req.user._id.toString();
     const postId = req.params.id;
 
-
+    console.log("Reposting post with ID: " + postId);
     //! If post deleted, pull postId from repostedPosts array of user
     if (!postId) {
       return res.status(400).json({ message: "Post ID is required" });
@@ -379,6 +380,8 @@ export const repostPost = async (req, res) => {
       (repost) => repost?._id.toString() === postId
     );
 
+    console.log("Already reposted: " + alreadyReposted);
+
     if (alreadyReposted) {
       // If already reposted, remove it
       user.repostedPosts = user.repostedPosts.filter(
@@ -391,8 +394,8 @@ export const repostPost = async (req, res) => {
       post.repostCount += 1;
     }
     await user.save();
-    await post.save();
-    res.status(200).json(post);
+    const repostedPost = await post.save();
+    res.status(200).json(repostedPost);
   } catch (error) {
     console.error("Error in repostPost controller: " + error.message);
     res.status(500).json({ error: "Internal Server Error" });

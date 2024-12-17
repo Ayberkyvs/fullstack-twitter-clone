@@ -131,9 +131,8 @@ const Actions = () => {
     },
   });
 
-
   const { mutate: repost, isPending: isReposting } = useMutation({
-    mutationFn: async (postId: string) => {
+    mutationFn: async ({postId}: {postId: string}) => {
       try {
         const res = await fetch(`/api/posts/repost/${postId}`, {
           method: "POST",
@@ -147,32 +146,86 @@ const Actions = () => {
         throw error;
       }
     },
-    onSuccess: (res) => {
-      if (res.type === "reply") {
-        queryClient.setQueryData(["replies", res.parentPost], (oldData: PostType[]) => {
-          if (oldData === undefined) return [{...res}];
-          return oldData.map((p) => {
-            if (p._id === res._id) {
-              return { ...p, repostCount: res.repostCount}
+    onMutate: async ({
+      postId,
+      setIsReposted,
+    }: {
+      postId: string;
+      setIsReposted: any;
+    }) => {
+      const authUser = queryClient.getQueryData<UserType>(["authUser"]);
+      const isReposted = authUser?.repostedPosts.includes(postId); //! Typescript Error here but its right bro idk;
+      setIsReposted((prev: boolean) => !prev);
+
+      // Optimistic Update
+      await queryClient.cancelQueries();
+
+      queryClient.setQueryData(["posts"], (oldPosts: PostType[]) => {
+        if (!oldPosts) return;
+        return oldPosts.map((post) => {
+          if (post._id === postId) {
+            return {
+              ...post,
+              repostCount: post.repostCount + (isReposted ? -1 : 1),
             };
-            return p;
-          });
+          }
+          return post;
         });
-      }else {
-        queryClient.setQueryData(["posts"], (oldData: PostType[]) => {
-          if (oldData === undefined) return [{...res}];
-          return oldData.map((p) => {
-            if (p._id === res._id) {
-              return { ...p, repostCount: res.repostCount };
-            }
-            return p;
-          });
+      });
+
+      queryClient.setQueryData(["posts", postId], (oldPost: PostType) => {
+        if (!oldPost) return;
+        return {
+          ...oldPost,
+          repostCount: oldPost.repostCount + (isReposted ? -1 : 1),
+        };
+      });
+
+      queryClient.setQueryData(["posts", "replies"], (oldPosts: PostType[]) => {
+        if (!oldPosts) return;
+        return oldPosts.map((post) => {
+          if (post._id === postId) {
+            console.log("asdasdadsad");
+            return {
+              ...post,
+              repostCount: post.repostCount + (isReposted ? -1 : 1),
+            };
+          }
+          return post;
         });
-      }
+      });
+    },
+    onSuccess: (res) => {
+      console.log("Response:", res);
+      // Sunucudan gelen başarı durumunda, cache'i güncelle
+      queryClient.setQueryData(["posts"], (oldPosts: PostType[]) => {
+        if (!oldPosts) return;
+        return oldPosts.map((post) =>
+          post._id === res._id
+            ? { ...post, repostCount: res.repostCount}
+            : post
+        );
+      });
+
+      queryClient.setQueryData(["posts", res._id], (oldPost: PostType) => {
+        if (!oldPost) return;
+        return { ...oldPost, repostCount: res.repostCount};
+      });
+
+      queryClient.setQueryData(["posts", "replies"], (oldPosts: PostType[]) => {
+        if (!oldPosts) return;
+        return oldPosts.map((post) =>
+          post._id === res._id
+            ? { ...post, repostCount: res.repostCount}
+            : post
+        );
+      });
+
       queryClient.invalidateQueries({ queryKey: ["authUser"] });
     },
     onError: (error: Error) => {
       toast.error(error.message);
+      queryClient.invalidateQueries();
     },
   });
 
@@ -201,79 +254,3 @@ const Actions = () => {
 }
 
 export default Actions;
-
-
-
-
-
-
-// onMutate: async ({postId, setIsReposted}: {postId:string, setIsReposted: any}) => {
-//   const authUser = queryClient.getQueryData<UserType>(["authUser"]);
-//   const isReposted = authUser?.repostedPosts.some(post => post._id === postId);
-
-//   setIsReposted((prev: boolean)=> !prev);
-
-//   // Optimistic Update
-//   await queryClient.cancelQueries();
-
-//   queryClient.setQueryData(["posts"], (oldPosts: PostType[]) => {
-//     if (!oldPosts) return;
-//     return oldPosts.map((post) => {
-//       if (post._id === postId) {
-//         return {
-//           ...post,
-//           likeCount: post.repostCount + (isReposted ? -1 : 1),
-          
-//         };
-//       }
-//       return post;
-//     });
-//   });
-
-//   queryClient.setQueryData(["posts", postId], (oldPost: PostType) => {
-//     if (!oldPost) return;
-//     return { ...oldPost, likeCount: oldPost.likeCount + (isLiked ? -1 : 1)};
-//   });
-
-//   queryClient.setQueryData(["posts", "replies"], (oldPosts: PostType[]) => {
-//     if (!oldPosts) return;
-//     return oldPosts.map((post) => {
-//       if (post._id === postId) {
-//         console.log("asdasdadsad");
-//         return {
-//           ...post,
-//           likeCount: post.likeCount + (isLiked ? -1 : 1),
-//         };
-//       }
-//       return post;
-//     });
-//   });
-
-// },
-// onSuccess: (res) => {
-//   // Sunucudan gelen başarı durumunda, cache'i güncelle
-//   queryClient.setQueryData(["posts"], (oldPosts: PostType[]) => {
-//     if (!oldPosts) return;
-//     return oldPosts.map((post) =>
-//       post._id === res._id ? { ...post, likeCount: res.likeCount, likes: res.likes } : post
-//     );
-//   });
-
-//   queryClient.setQueryData(["posts", res._id], (oldPost: PostType) => {
-//     if (!oldPost) return;
-//     return { ...oldPost, likeCount: res.likeCount, likes: res.likes };
-//   });
-
-//   queryClient.setQueryData(["posts", "replies"], (oldPosts: PostType[]) => {
-//     if (!oldPosts) return;
-//     return oldPosts.map((post) =>
-//       post._id === res._id ? { ...post, likeCount: res.likeCount, likes: res.likes } : post
-//     );
-//   });
-
-//   queryClient.invalidateQueries({ queryKey: ["authUser"] });
-// },
-// onError: (error: Error) => {
-//   toast.error(error.message);
-//   queryClient.invalidateQueries();
-// },

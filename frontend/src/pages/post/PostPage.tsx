@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import { Link, useParams } from 'react-router-dom';
 import PageHeading from '../../components/ui/PageHeading';
 import Avatar from '../../components/common/Avatar';
@@ -9,7 +9,6 @@ import { RiUserFollowLine, RiUserUnfollowLine } from 'react-icons/ri';
 import postActions from '../../utils/postActions';
 import { useQuery } from '@tanstack/react-query';
 import renderTextWithHashtags from '../../utils/renderWithHashtags';
-import { formatDate } from '../../utils/formatDate';
 import PostActions from '../../components/common/postActions/index';
 import Post from '../../components/common/Post';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
@@ -20,7 +19,7 @@ const PostPage = () => {
     const param = useParams();
     const postId = param.id;
 
-    const { data: post, isPending: isPostLoading, refetch:refetechPost } = useQuery<PostType>({
+    const { data: post, isPending: isPostLoading} = useQuery<PostType>({
         queryKey: ["posts", postId],
         queryFn: async () => {
             try {
@@ -55,16 +54,10 @@ const PostPage = () => {
 
     const { data: authUser } = useQuery<UserType>({ queryKey: ["authUser"] });
 
+    //? Replace follow, deletePost
     const {
         follow,
-        isFollowPending,
         deletePost,
-        isDeleting,
-        likePost,
-        isLiking,
-        repost,
-        isReposting,
-        copyToClipboard
     } = postActions();
 
     const user = post?.user as UserType;
@@ -98,7 +91,7 @@ const PostPage = () => {
                         className="btn btn-xs hover:bg-base-content/60 bg-base-content text-base-100 w-fit h-[40px] px-4 text-base font-bold rounded-full"
                         onClick={() => follow(user._id)}
                         >
-                        Follow
+                        {isFollowing ? "Unfollow" : "Follow"}
                     </button>
                 }
                 <DropdownSettings buttonClassName="m-0 h-full">

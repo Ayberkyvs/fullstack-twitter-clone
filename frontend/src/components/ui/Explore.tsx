@@ -4,7 +4,9 @@ import { useQuery } from "@tanstack/react-query";
 import User from "./User";
 import React from "react";
 import useFollow from "../hooks/useFollow";
-
+import { HashtagType, UserType } from "../../utils/types";
+import {v4 as uuidv4} from "uuid";
+import LoadingSpinner from "../common/LoadingSpinner";
 const Explore = ({
   exploreType,
   className,
@@ -49,7 +51,7 @@ const Explore = ({
     refetch();
   }, [exploreType, refetch]);
 
-  const {follow, isPending} = useFollow();
+  const {follow, isPending:isFollowPending} = useFollow();
   //! Burada hata var herkese pending
   return (
     <div className={`flex flex-col ${className}`}>
@@ -64,30 +66,30 @@ const Explore = ({
         })}
       {!isLoading &&
         !isError &&
-        data?.slice(0, limit).map((item) => {
+        data?.slice(0, limit).map((item: UserType | HashtagType) => {
           return exploreType === "suggested" ? (
             <User
-              key={item.username}
-              user={item}
+              key={uuidv4()}
+              user={item as UserType}
               rightButton={
                 <button
                   title="Follow"
                   type="button"
                   className="btn btn-xs hover:bg-base-content/60 bg-base-content text-base-100 w-fit h-[40px] px-4 text-base font-bold rounded-full"
-                  onClick={() => follow(item._id)}
+                  onClick={() => follow((item as UserType)._id)}
                 >
-                  Follow
+                  {isFollowPending ? <LoadingSpinner size="sm" /> : "Follow"}
                 </button>
               }
             />
           ) : (
             <div
-              className="flex flex-col w-full h-fit hover:bg-base-200"
-              key={item._id}
+              className="flex flex-col w-full h-fit"
+              key={uuidv4()}
             >
-              <h6 className="text-base font-bold">#{item.tag}</h6>
+              <h6 className="text-base font-bold">#{(item as HashtagType).tag}</h6>
               <span className="text-sm text-neutral">
-                {item.usageCount} posts
+                {(item as HashtagType).usageCount} posts
               </span>
             </div>
           );

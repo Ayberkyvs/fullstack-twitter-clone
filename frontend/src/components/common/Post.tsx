@@ -99,7 +99,7 @@ const Post = ({ post }: { post: PostType }) => {
       )}
       {post.repostedBy && (
         <p className="flex justify-center items-center text-neutral gap-2 text-sm px-5 font-bold">
-          <RepostIcon className="w-[1.1em] h-[1.1em]" />
+          <RepostIcon className="w-[1.1em] h-[1.1em]" isReposted/>
           {post.repostedBy.username} reposted
         </p>
       )}
