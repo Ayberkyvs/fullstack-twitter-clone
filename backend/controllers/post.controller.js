@@ -4,23 +4,33 @@ import Post from "../models/post.model.js";
 import User from "../models/user.model.js";
 import Notification from "../models/notification.model.js";
 import { v2 as cloudinary } from "cloudinary";
-import { populate } from "dotenv";
 
-// export const getPostById = async (req, res) => {
-//   const postId = req.params.id;
-//   try {
-//     if (!postId)
-//       return res.status(400).json({ message: "Post ID is required" });
-//     const post = await Post.findById(postId)
-//       .populate({ path: "user", select: "-password" })
-//       .populate({ path: "comments.user", select: "-password" });
-//     if (!post) return res.status(404).json({ message: "Post not found" });
-//     res.status(200).json(post);
-//   } catch (error) {
-//     console.error("Error in getPostById controller: " + error.message);
-//     res.status(500).json({ error: "Internal Server Error" });
-//   }
-// };
+export const getPostById = async (req, res) => {
+  const postId = req.params.id;
+  try {
+    if (!postId)
+      return res.status(400).json({ message: "Post ID is required" });
+    const post = await Post.findById(postId)
+      .populate({ path: "user", select: "-password" })
+      .populate({
+        path: "parentPost",
+        select: "-likes -childPosts",
+        populate: { path: "user", select: "+username +fullName" },
+      })
+      .populate({
+        path: "childPosts",
+        populate: {
+          path: "user",
+          select: "-password",
+        },
+      });
+    if (!post) return res.status(404).json({ message: "Post not found" });
+    res.status(200).json(post);
+  } catch (error) {
+    console.error("Error in getPostById controller: " + error.message);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
 
 export const createPost = async (req, res) => {
   try {
@@ -85,23 +95,23 @@ export const createPost = async (req, res) => {
       parentPost.replyCount += 1;
       await parentPost.save();
       populatedPost = await Post.findById(savedPost._id)
-      .select("-likes -childPosts")
-      .populate({
-        path: "user",
-        select: "-password"
-      })
-      .populate({
-        path: "parentPost",
-        select: "-likes -childPosts",
-        populate: {
+        .select("-likes -childPosts")
+        .populate({
           path: "user",
-          select: "+username +fullName"
-        }
-      });
+          select: "-password",
+        })
+        .populate({
+          path: "parentPost",
+          select: "-likes -childPosts",
+          populate: {
+            path: "user",
+            select: "+username +fullName",
+          },
+        });
     } else {
       populatedPost = await Post.findById(savedPost._id)
-      .select("-likes -childPosts")
-      .populate({ path: "user", select: "-password" });
+        .select("-likes -childPosts")
+        .populate({ path: "user", select: "-password" });
     }
 
     res.status(201).json(populatedPost);
@@ -185,11 +195,8 @@ export const likeUnlikePost = async (req, res) => {
         to: post.user,
         type: "like",
       });
-      const updatedLikes = post.likes.filter(
-        (id) => id.toString() !== currentUserId.toString()
-      );
-      const updatedLikeCount = post.likeCount;
-      res.status(200).json({ updatedLikes, updatedLikeCount });
+
+      res.status(200).json(post);
     } else {
       //? like the post
       post.likes.push({ user: currentUserId });
@@ -208,9 +215,7 @@ export const likeUnlikePost = async (req, res) => {
       });
       await notification.save();
 
-      const updatedLikes = post.likes;
-      const updatedLikeCount = post.likeCount;
-      res.status(200).json({ updatedLikes, updatedLikeCount });
+      res.status(200).json(post);
     }
   } catch (error) {
     console.error("Error in likeUnlikePost controller: " + error.message);
@@ -220,8 +225,8 @@ export const likeUnlikePost = async (req, res) => {
 
 export const getAllPosts = async (req, res) => {
   try {
-    const posts = await Post.find({type : "original"})
-      .select("-likes -childPosts")
+    const posts = await Post.find({ type: "original" })
+      .select("-likes")
       .sort({ createdAt: -1 })
       .populate({ path: "user", select: "-password" });
 
@@ -262,9 +267,9 @@ export const getFollowingPosts = async (req, res) => {
     // Find user and populate 'following' field
     const user = await User.findById(currentUserId).populate("following");
     if (!user) return res.status(404).json({ message: "User not found" });
-    
+
     const following = user.following;
-    
+
     // 1. Get normal posts from users being followed
     const normalPosts = await Post.find({
       user: { $in: following.map((f) => f._id) },
@@ -272,9 +277,13 @@ export const getFollowingPosts = async (req, res) => {
       .select("-likes -childPosts")
       .sort({ createdAt: -1 })
       .populate({ path: "user", select: "-password" })
-      .populate({ path: "parentPost", select: "-likes -childPosts", populate: { path: "user", select: "+username +fullName" } })
+      .populate({
+        path: "parentPost",
+        select: "-likes -childPosts",
+        populate: { path: "user", select: "+username +fullName" },
+      })
       .lean(); // Use lean to work with plain JavaScript objects
-    
+
     // 2. Get reposted posts and include reposting user info
     const repostedPostsPromises = following.map(async (followedUser) => {
       const repostedPosts = await Post.find({
@@ -284,14 +293,16 @@ export const getFollowingPosts = async (req, res) => {
         .sort({ createdAt: -1 })
         .populate({ path: "user", select: "-password" })
         .lean(); // Use lean for plain objects
-      
+
       // Add repostedAt field to each reposted post
       repostedPosts.forEach((post) => {
         post.repostedBy = followedUser; // Add reposting user information
-        post.repostedAt = followedUser.repostedPosts.find(r => r.post.toString() === post._id.toString())?.createdAt; // Use repost timestamp if available
+        post.repostedAt = followedUser.repostedPosts.find(
+          (r) => r.post.toString() === post._id.toString()
+        )?.createdAt; // Use repost timestamp if available
         post.type = "repost"; // Add type field to distinguish reposted posts
       });
-      
+
       return repostedPosts;
     });
 
@@ -309,10 +320,9 @@ export const getFollowingPosts = async (req, res) => {
 
     // If no posts found, return empty array
     if (feedPosts.length <= 0) return res.status(200).json([]);
-    
+
     // Return the feed posts
     return res.status(200).json(feedPosts);
-    
   } catch (error) {
     console.error("Error in getFollowingPosts controller: " + error.message);
     res.status(500).json({ error: "Internal Server Error" });
@@ -343,6 +353,8 @@ export const repostPost = async (req, res) => {
     const currentUserId = req.user._id.toString();
     const postId = req.params.id;
 
+
+    //! If post deleted, pull postId from repostedPosts array of user
     if (!postId) {
       return res.status(400).json({ message: "Post ID is required" });
     }
@@ -357,29 +369,48 @@ export const repostPost = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
+    if (!user.repostedPosts) {
+      user.repostedPosts = [];
+      await user.save();
+    };
+
     // Check if the post is already reposted
-    const alreadyReposted = user.repostedPosts.some(repost => repost?.post?.toString() === postId);
+    const alreadyReposted = user.repostedPosts?.some(
+      (repost) => repost?._id.toString() === postId
+    );
 
     if (alreadyReposted) {
       // If already reposted, remove it
-      user.repostedPosts = user.repostedPosts.filter(repost => repost?.post?.toString() !== postId);
-      await user.save();
-
+      user.repostedPosts = user.repostedPosts.filter(
+        (repost) => repost?._id?.toString() !== postId
+      );
       if (post.repostCount > 0) post.repostCount -= 1;
-      await post.save();
     } else {
       // If not reposted, create a new repost
-      user.repostedPosts.push({ post: postId });
-      await user.save();
-
+      user.repostedPosts.push(postId);
       post.repostCount += 1;
-      await post.save();
     }
-
-    const updatedRepostCount = post.repostCount;
-    res.status(200).json({ updatedRepostCount });
+    await user.save();
+    await post.save();
+    res.status(200).json(post);
   } catch (error) {
     console.error("Error in repostPost controller: " + error.message);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+export const getPostReplies = async (req, res) => {
+  try {
+    const postId = req.params.id;
+    if (!postId)
+      return res.status(400).json({ message: "Post ID is required" });
+    const post = await Post.find({ parentPost: postId })
+      .sort({ createdAt: 1 })
+      .populate({ path: "user", select: "-password" });
+    if (!post) return res.status(404).json({ message: "Post not found" });
+    res.status(200).json(post);
+  } catch (error) {
+    console.error("Error in getPostReplies controller: " + error.message);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };

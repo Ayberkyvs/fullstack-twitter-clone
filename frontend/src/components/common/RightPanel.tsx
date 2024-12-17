@@ -32,7 +32,6 @@ const RightPanel = () => {
 			<Explore exploreType="trending" limit={5} className="gap-5"/>
 			<Link to="/explore?tab=trending" className="link link-primary text-base mt-2">Show More</Link>
 		</HighlightsSection>
-
 	</section>
     );
 };

@@ -5,11 +5,6 @@ export type SignUpFormType = {
 	password: string;
 }
 
-type repostedPost = {
-	post: string;
-	createdAt: string;
-	updatedAt: string;
-}
 export type UserType = {
 	_id: string;
 	fullName: string;
@@ -19,7 +14,7 @@ export type UserType = {
 	likedPosts: string[];
 	followers: string[];
 	following: string[];
-	repostedPosts: repostedPost[];
+	repostedPosts: RepostedPost[];
 };
 
 export type PostType = {
@@ -28,6 +23,7 @@ export type PostType = {
 	img?: string;
 	user: UserType;
 	parentPost?: PostType;
+	childPosts?: PostType[];
 	type: "original" | "reply";
 	comments: {
 		_id: string;
@@ -41,6 +37,8 @@ export type PostType = {
 	createdAt: string;
 	repostedBy?: UserType;
 };
+
+export type RepostedPost = Pick<PostType, "_id" | "user" | "createdAt">;
 
 export type HashtagType = {
 	_id: string;

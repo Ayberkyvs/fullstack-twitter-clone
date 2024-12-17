@@ -1,17 +1,34 @@
-import React from 'react'
-const Modal = ({className, children, modalName, trigger}: {className?:string, children: React.ReactNode, modalName: string, trigger: React.ReactNode}) => {
+import React from "react";
+const Modal = ({
+  className,
+  children,
+  modalName,
+  trigger,
+}: {
+  className?: string;
+  children: React.ReactNode;
+  modalName: string;
+  trigger: React.ReactNode;
+}) => {
   return (
-    <div className={className}>
-      {trigger}
-    <input type="checkbox" id={modalName} className="modal-toggle" />
-    <div className="modal" role="dialog">
-        <div className="modal-box overflow-auto scrollbar-hide">
-            {children}
-        </div>
-        <label className="modal-backdrop" htmlFor={modalName}>Close</label>
-    </div>
-    </div>
-  )
-}
+    <>
+    {trigger}
+    <dialog id={modalName} className={`modal ${className}`}>
+      <div className="modal-box">
+        {children}
+      </div>
+      <form method="dialog" className="modal-backdrop">
+        <button type="button" onClick={() => {
+          const modal = document.getElementById(`${modalName}`) as HTMLDialogElement | null;
+          modal?.close();
+        }}>close</button>
+      </form>
+    </dialog>
+    </>
+  );
+};
 
-export default Modal
+export default Modal;
+
+
+{/* <button className="btn" onClick={()=>document.getElementById('my_modal_2').showModal()}>open modal</button> */}

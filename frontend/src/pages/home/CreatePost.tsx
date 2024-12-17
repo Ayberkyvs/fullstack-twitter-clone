@@ -5,8 +5,9 @@ import { GoImage } from "react-icons/go";
 import toast from "react-hot-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { PostType, UserType } from "../../utils/types";
+import Avatar from "../../components/common/Avatar";
 
-const CreatePost = ({ className, type = "original", parentPostId }: { className: string; type: "original" | "reply" ; parentPostId?: string}) => {
+const CreatePost = ({ className, type = "original", parentPostId, showAvatar }: { className: string; type: "original" | "reply" ; parentPostId?: string, showAvatar:boolean}) => {
   const [text, setText] = useState("");
   const [img, setImg] = useState<string | ArrayBuffer | null>(null);
   const imgRef = useRef(null);
@@ -36,11 +37,11 @@ const CreatePost = ({ className, type = "original", parentPostId }: { className:
       }
     },
     onSuccess: (data) => {
-      console.log(data);
       setText("");
       setImg(null);
       queryClient.setQueryData(["posts"], (oldData: PostType[]) => {
         if (type === "reply") {
+          // Eğer type "reply" ise, parent postun replyCount'unu arttır ve yeni postu ekle
           const updatedData = oldData.map((p) => {
             if (p._id === parentPostId) {
               return { ...p, replyCount: p.replyCount + 1 };
@@ -55,12 +56,14 @@ const CreatePost = ({ className, type = "original", parentPostId }: { className:
         toast.success("You posted successfully");
         return [data, ...oldData];
       });
-      // update cache
-      // queryClient.invalidateQueries({ queryKey: ["posts"] });
+
+      // queryClient.setQueryData(["posts", data.parentPost._id], (oldData: PostType[]) => {
+      //   return [data, ...oldData];
+      // });
     },
   });
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: any) => {
     e.preventDefault();
     if ((!text && !img) || (text && text.trim() === "" && !img)) {
       toast.error("Please write something or upload an image to post.");
@@ -85,22 +88,16 @@ const CreatePost = ({ className, type = "original", parentPostId }: { className:
 
   return (
     <div className={`flex w-full h-fit min-h-[150px] p-4 items-start gap-4 ${className}`}>
-      <div className="avatar z-[0]">
-        <div className="w-12 rounded-full">
-          {/* authUser varsa resim ve isim render edilir */}
-          <img
-            src={authUser?.profileImg || "/avatar-placeholder.png"}
-            alt={`${authUser?.fullName || "User"} profile picture`}
-          />
-        </div>
-      </div>
+      {showAvatar && <Avatar user={authUser} className="w-12"/>}
       <form className="flex flex-col gap-2 w-full h-full" onSubmit={handleSubmit}>
+        <div className="flex w-full">
         <textarea
           className="textarea w-full h-[60px] p-0 text-base resize-none border-none focus:outline-none placeholder:text-neutral rounded-none"
           placeholder={type === "reply" ? "Write your reply..." : "What is happening?!"}
           value={text}
           onChange={(e) => setText(e.target.value)}
         />
+      </div>
         {img && (
           <div className="relative mx-auto w-full h-fit object-cover">
             <IoCloseSharp
@@ -129,7 +126,7 @@ const CreatePost = ({ className, type = "original", parentPostId }: { className:
             <FaRegSmile className="fill-primary w-5 h-5 cursor-pointer" />
           </div>
           <input type="file" accept="image/*" hidden ref={imgRef} onChange={handleImgChange} />
-          <button className="btn btn-primary rounded-full btn-sm px-4" type="submit">
+          <button className="btn btn-primary rounded-full btn-sm px-4" type="submit" onClick={handleSubmit}>
             {isPending ? "Posting..." : type === "reply" ? "Reply" : "Post"}
           </button>
         </div>

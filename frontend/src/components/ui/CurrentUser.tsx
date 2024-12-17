@@ -32,7 +32,6 @@ const CurrentUser = () => {
     },
   });
   const { data: authUser } = useQuery<UserType>({ queryKey: ["authUser"] });
-  console.log(authUser);
   return (
     authUser && (
       <User
