@@ -8,7 +8,7 @@ const HeartIcon = ({ isLiked, className }: { isLiked: boolean, className: string
     if (isLiked) {
       controls.start({ scale: [1, 1.3, 1] });
     } else {
-      controls.start({ scale: [1, 1.1, 1] });
+      controls.start({ scale: [1, 1.2, 1] });
     }
   }, [isLiked, controls]);
 

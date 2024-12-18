@@ -108,6 +108,13 @@ export const createPost = async (req, res) => {
             select: "+username +fullName",
           },
         });
+      await new Notification({
+        from: currentUserId,
+        to: parentPost.user,
+        type: "reply",
+        postId: parentPostId,
+        replyContext: text,
+      }).save();
     } else {
       populatedPost = await Post.findById(savedPost._id)
         .select("-likes -childPosts")
@@ -157,6 +164,13 @@ export const deletePost = async (req, res) => {
       if (parentPost) {
         parentPost.childPosts.pull(post._id);
         parentPost.replyCount -= 1;
+
+        await Notification.findOneAndDelete({
+          from: req.user._id,
+          to: parentPost.user,
+          postId: post.parentPost,
+          type: "reply",
+        });
         await parentPost.save();
       }
     }
@@ -204,6 +218,7 @@ export const likeUnlikePost = async (req, res) => {
         },
       });
       await post.save();
+
       await Notification.deleteOne({
         from: currentUserId,
         to: post.user,
@@ -245,7 +260,6 @@ export const getAllPosts = async (req, res) => {
       .populate({ path: "user", select: "-password" });
 
     if (posts.length <= 0) return res.status(200).json([]);
-    console.log(posts);
     res.status(200).json(posts);
   } catch (error) {
     console.error("Error in getAllPosts controller: " + error.message);
@@ -402,10 +416,26 @@ export const repostPost = async (req, res) => {
         (repost) => repost?._id?.toString() !== postId
       );
       if (post.repostCount > 0) post.repostCount -= 1;
+
+      await Notification.deleteOne({
+        from: currentUserId,
+        to: post.user,
+        postId: postId,
+        type: "repost",
+      });
     } else {
       // If not reposted, create a new repost
       user.repostedPosts.push(postId);
       post.repostCount += 1;
+
+      const notification = new Notification({
+        from: currentUserId,
+        to: post.user,
+        postId: postId,
+        type: "repost",
+      });
+
+      await notification.save();
     }
     await user.save();
     const repostedPost = await post.save();

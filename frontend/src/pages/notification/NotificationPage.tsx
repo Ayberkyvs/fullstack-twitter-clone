@@ -55,6 +55,7 @@ const NotificationPage = () => {
       <PageHeading
         title="Notifications"
         subtitle="All your notifications in one place."
+        headerMobile={false}
       >
         {notifications?.length > 0 &&
         <Modal
@@ -69,6 +70,7 @@ const NotificationPage = () => {
                 modal?.showModal();
               }}
               title="Delete All Notifications"
+              type="button"
             >
               <GoTrash
                 title="Delete All Notifications"

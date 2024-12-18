@@ -7,6 +7,13 @@ export const getNotifications = async (req, res) => {
             .populate({
                 "path": "from",
                 "select": "username profileImg",
+            })
+            .populate({
+                "path": "postId",
+                "populate": {
+                    "path": "user",
+                    "select": "username profileImg fullName"
+                }
             });
         await Notification.updateMany({ to: currentUserId, read: false }, { $set: { read: true } }, { multi: true });
         res.status(200).json(notifications);

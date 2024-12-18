@@ -44,7 +44,9 @@ export type HashtagType = {
 export type NotificationType = {
 	from: string;
 	to: string;
-	type: "like" | "comment" | "follow" | "reply";
+	postId?: string;
+	replyContext: string;
+	type: "like" | "reply" | "follow" | "repost";
 	read: boolean;
 	createdAt: string;
 }

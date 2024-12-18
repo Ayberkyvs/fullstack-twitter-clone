@@ -43,20 +43,25 @@ export const followUnfollowUser = async (req, res) => {
         if (!userToModify || !currentUser) return res.status(404).json({error: 'User not found'});
         const isFollowing = currentUser.following.includes(userToModify._id);
 
+        let notification;
         if (isFollowing) {
             await currentUser.updateOne({$pull: {following: userToModify._id}});
             await userToModify.updateOne({$pull: {followers: req.user._id}});
+
+            await Notification.findOneAndDelete({from: req.user._id, to: userToModify._id, type: 'follow'});
             res.status(200).json({message: 'User unfollowed successfully'});
         } else {
             await currentUser.updateOne({$push: {following: userToModify._id}});
             await userToModify.updateOne({$push: {followers: req.user._id}});
 
-            const newNotification = new Notification({
+            notification = new Notification({
                 from: req.user._id,
                 to: userToModify._id,
                 type: 'follow',
             });
-            await newNotification.save();
+
+            console.log(notification);
+            await notification.save();
             res.status(200).json({message: 'User followed successfully'});
         }
     } catch (error) {
