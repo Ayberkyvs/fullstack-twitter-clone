@@ -22,7 +22,7 @@ const PostActions = ({ post }: PostActionsProps) => {
 
   const handleLike = () => {
     if (isLiking) return;
-    likePost({postId, setIsLiked});
+    likePost({ postId, setIsLiked });
   };
   const handleRepost = () => {
     if (isReposting) return;

@@ -5,6 +5,7 @@ import CreatePost from "./CreatePost";
 import Tabs from "../../components/ui/Tabs";
 import { IoSend } from "react-icons/io5";
 import Modal from "../../components/ui/Modal";
+import PageHeading from "../../components/ui/PageHeading";
 
 const HomePage = () => {
   const [feedType, setFeedType] = React.useState("forYou");
@@ -14,8 +15,9 @@ const HomePage = () => {
   ];
   return (
     <div className="flex flex-col w-full min-h-screen">
+      <PageHeading headerMobile title/>
       <Tabs activeTab={feedType} setActiveTab={setFeedType} tabs={tabs} />
-      <CreatePost className="hidden sm:flex " type="original" showAvatar/>
+      <CreatePost className="hidden sm:flex " type="original" showAvatar />
       <Posts feedType={feedType} />
       <Modal
         modalName="create_post_model_2"
@@ -37,7 +39,7 @@ const HomePage = () => {
           </button>
         }
       >
-        <CreatePost className="flex" type="original" showAvatar/>
+        <CreatePost className="flex" type="original" showAvatar modalName="create_post_model_2"/>
       </Modal>
     </div>
   );

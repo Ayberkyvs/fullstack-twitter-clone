@@ -24,12 +24,7 @@ export type PostType = {
 	user: UserType;
 	parentPost?: PostType;
 	childPosts?: PostType[];
-	type: "original" | "reply";
-	comments: {
-		_id: string;
-		text: string;
-		user: UserType;
-	}[];
+	type: "original" | "reply" | "repost";
 	likes: object[];
 	replyCount: number;
 	likeCount: number;

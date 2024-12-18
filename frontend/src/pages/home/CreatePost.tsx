@@ -7,7 +7,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { PostType, UserType } from "../../utils/types";
 import Avatar from "../../components/common/Avatar";
 
-const CreatePost = ({ className, type = "original", parentPostId, showAvatar }: { className: string; type: "original" | "reply" ; parentPostId?: string, showAvatar:boolean}) => {
+const CreatePost = ({ className, type = "original", parentPostId, showAvatar, modalName }: { className: string; type: "original" | "reply" ; parentPostId?: string, showAvatar:boolean, modalName?: string}) => {
   const [text, setText] = useState("");
   const [img, setImg] = useState<string | ArrayBuffer | null>(null);
   const imgRef = useRef(null);
@@ -16,7 +16,7 @@ const CreatePost = ({ className, type = "original", parentPostId, showAvatar }: 
   const queryClient = useQueryClient();
 
   const { mutate: createPost, isError, isPending, error} = useMutation({
-    mutationFn: async ({ text, img, type, parentPostId }: { text: string; img: string | ArrayBuffer | null; type: string; parentPostId?: string }) => {
+    mutationFn: async ({ text, img, type, parentPostId}: { text: string; img: string | ArrayBuffer | null; type: string; parentPostId?: string}) => {
       try {
         let requestBody: Record<string, any> = { text, img, type };
         if (type === "reply" && parentPostId) {
@@ -36,31 +36,132 @@ const CreatePost = ({ className, type = "original", parentPostId, showAvatar }: 
         throw error;
       }
     },
+    // onMutate: async ({ text, img, type, parentPostId}) => {
+    //   const post = {
+    //     _id: Date.now().toString(),
+    //     text,
+    //     img: img ? (img as string) : undefined,
+    //     type: type as "original" | "reply" | "repost",
+    //     parentPost: parentPostId ? ({ _id: parentPostId } as PostType) : undefined,
+    //     user: authUser as UserType,
+    //     likes: [{}],
+    //     replyCount: 0,
+    //     likeCount: 0,
+    //     repostCount: 0,
+    //     createdAt: new Date().toISOString(),
+    //   }
+
+    //   await queryClient.cancelQueries();
+
+    //   const updateReplyCount = (oldData: PostType[]) => {
+    //     if (!oldData) return oldData;
+    //     return oldData
+    //       ?.map((p) =>
+    //         p._id === parentPostId ? { ...p, replyCount: p.replyCount + 1 } : p
+    //       )
+    //       .push(post);
+    //   };
+
+    //   queryClient.setQueryData(["posts", "replies"], (oldData: PostType[]) => {
+    //     if (post.type === "reply") {
+    //       return updateReplyCount(oldData);
+    //     }
+    //     return oldData;
+    //   });
+
+    //   queryClient.setQueryData(["posts"], (oldData: PostType[]) => {
+    //     if (post.type === "reply") {
+    //       return updateReplyCount(oldData);
+    //     }
+    //     if (!oldData) return oldData;
+    //     return oldData.push(post);
+    //   });
+
+    //   queryClient.setQueryData(["posts", parentPostId], (oldData: PostType) => {
+    //     if (!oldData) return oldData;
+    //     return {
+    //       ...oldData,
+    //       replyCount: oldData.replyCount + 1,
+    //     };
+    //   });
+    // },
     onSuccess: (data) => {
-      setText("");
-      setImg(null);
-      queryClient.setQueryData(["posts"], (oldData: PostType[]) => {
-        if (type === "reply") {
-          // Eğer type "reply" ise, parent postun replyCount'unu arttır ve yeni postu ekle
-          const updatedData = oldData.map((p) => {
-            if (p._id === parentPostId) {
-              return { ...p, replyCount: p.replyCount + 1 };
-            }
-            return p;
-          });
-          toast.success('You replied successfully');
-          // Yeni postu eklerken güncellenmiş veriyi kullanıyoruz
-          return [data, ...updatedData];
+      // queryClient.setQueryData(["posts"], (oldData: PostType[]) => {
+      //   if (type === "reply") {
+      //     // Eğer type "reply" ise, parent postun replyCount'unu arttır ve yeni postu ekle
+      //     const updatedData = oldData.map((p) => {
+      //       if (p._id === parentPostId) {
+      //         return { ...p, replyCount: p.replyCount + 1 };
+      //       }
+      //       return p;
+      //     });
+      //     toast.success('You replied successfully');
+      //     // Yeni postu eklerken güncellenmiş veriyi kullanıyoruz
+      //     return [data, ...updatedData];
+      //   }
+      //   // Eğer type "original" ise, sadece yeni postu ekle
+      //   toast.success("You posted successfully");
+      //   return [data, ...oldData];
+      // });
+
+
+      const updateReplyCount = (oldData: PostType[]) => {
+        if (!oldData) return oldData;
+        const updatedData = oldData
+          ?.map((p) =>
+            p._id === data.parentPost?._id ? { ...p, replyCount: data.parentPost.replyCount } : p
+          )
+        return [data, ...updatedData];
+      };
+
+      queryClient.setQueryData(["posts", "replies"], (oldData: PostType[]) => {
+        if (data.type === "reply") {
+          return updateReplyCount(oldData);
         }
-        // Eğer type "original" ise, sadece yeni postu ekle
-        toast.success("You posted successfully");
+        return oldData;
+      });
+
+      queryClient.setQueryData(["posts"], (oldData: PostType[]) => {
+        if (data.type === "reply") {
+          return updateReplyCount(oldData);
+        }
+        if (!oldData) return oldData;
         return [data, ...oldData];
       });
 
-      // queryClient.setQueryData(["posts", data.parentPost._id], (oldData: PostType[]) => {
-      //   return [data, ...oldData];
-      // });
+      queryClient.setQueryData(["posts", parentPostId], (oldData: PostType) => {
+        if (!oldData) return;
+        return {
+          ...oldData,
+          replyCount: data?.parentPost?.replyCount,
+        };
+      });
+
+      queryClient.invalidateQueries({ queryKey: ["authUser"] });
+      if (data.type === "reply") {
+        toast.success('You replied successfully')
+      } else if (data.type === "original") {
+        toast.success("You posted successfully");
+      } else {
+        toast.success("You did something successfully");
+      }
     },
+    onError: (error: Error) => {
+      toast.error(error.message || "An error occurred.");
+      const queriesToInvalidate = [
+        ["authUser"],
+        ["posts"],
+        ["posts", "replies"],
+      ];
+      queriesToInvalidate.forEach((queryKey) => {
+        queryClient.invalidateQueries({ queryKey });
+      });
+    },
+    onSettled: () => {
+      setText("");
+      setImg(null);
+      modalName && (document.getElementById(modalName) as HTMLDialogElement).close();
+    }
   });
 
   const handleSubmit = (e: any) => {

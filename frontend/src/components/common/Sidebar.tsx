@@ -18,7 +18,7 @@ const Sidebar = ({
 
   return (
     <div
-      className={`hidden xs:flex flex-col w-full h-full py-3 border-r border-base-content/10 gap-5 ${
+      className={`hidden xs:flex flex-col w-full h-screen py-3 border-r border-base-content/10 gap-5 ${
         collapse ? "" : "xl:px-5"
       }`}
     >
@@ -77,7 +77,7 @@ const Sidebar = ({
                 </button>
               }
             >
-              <CreatePost className="flex" type="original" showAvatar/>
+              <CreatePost className="flex" type="original" showAvatar modalName="create_post_model"/>
             </Modal>
           </li>
         </ul>

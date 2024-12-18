@@ -161,6 +161,20 @@ export const deletePost = async (req, res) => {
       }
     }
 
+    const user = await User.find({repostedPosts: post._id}).select("_id repostedPosts");
+    console.log("Bu gonderiyi repost edenler: ", user);
+    if (user) {
+      const bulkOperations = user.map((u) => ({
+        updateOne: {
+          filter: { _id: u._id },
+          update: {
+            $pull: { repostedPosts: { _id: post._id } },
+          },
+        },
+      }));
+      await User.bulkWrite(bulkOperations);
+    }
+
     await Post.findByIdAndDelete(req.params.id);
     res.status(200).json({ message: "Post deleted successfully" });
   } catch (error) {
@@ -277,11 +291,11 @@ export const getFollowingPosts = async (req, res) => {
       .select("-likes -childPosts")
       .sort({ createdAt: -1 })
       .populate({ path: "user", select: "-password" })
-      // .populate({
-      //   path: "parentPost",
-      //   select: "-likes -childPosts",
-      //   populate: { path: "user", select: "+username +fullName" },
-      // })
+      .populate({
+        path: "parentPost",
+        select: "-likes -childPosts",
+        populate: { path: "user", select: "+username +fullName" },
+      })
       .lean(); // Use lean to work with plain JavaScript objects
 
     // 2. Get reposted posts and include reposting user info

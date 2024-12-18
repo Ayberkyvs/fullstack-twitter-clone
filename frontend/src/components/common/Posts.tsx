@@ -32,7 +32,10 @@ const Posts = ({feedType}: {feedType?: string}) => {
 				console.error(error);
 				throw error;
 			}
-		}
+		},
+		refetchOnMount: true,
+		refetchOnWindowFocus: true,
+		refetchInterval: 1000 * 60 * 1,
 	});
 
 	React.useEffect(() => {

@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { PostType, UserType } from "../../utils/types";
 import CommentIcon from "../svgs/CommentIcon";
 import RepostIcon from "../svgs/RepostIcon";
@@ -19,6 +19,7 @@ import Avatar from "./Avatar";
 import PostActions from "./postActions";
 
 const Post = ({ post }: { post: PostType }) => {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { data: authUser } = useQuery<UserType>({ queryKey: ["authUser"] });
   const { follow, isPending: isFollowPending } = useFollow();
@@ -46,28 +47,64 @@ const Post = ({ post }: { post: PostType }) => {
         throw error;
       }
     },
-    onSuccess: () => {
+    onMutate: async () => {
+      await queryClient.cancelQueries();
+
+      const updateReplyCount = (oldData: PostType[]) => {
+        if (!oldData) return oldData;
+        return oldData
+          ?.map((p) =>
+            p._id === post.parentPost?._id ? { ...p, replyCount: p.replyCount - 1 } : p
+          )
+          .filter((p) => p._id !== post._id);
+      };
+
+      queryClient.setQueryData(["posts", "replies"], (oldData: PostType[]) => {
+        if (post.type === "reply") {
+          return updateReplyCount(oldData);
+        }
+        return oldData;
+      });
+
       queryClient.setQueryData(["posts"], (oldData: PostType[]) => {
         if (post.type === "reply") {
-          // posts, postId uzerinde islem yap
-          const updatedData = oldData
-            .map((p) => {
-              if (p._id === post.parentPost?._id) {
-                return { ...p, replyCount: p.replyCount - 1 };
-              }
-              return p;
-            })
-            .filter((p) => p._id !== post._id);
-          toast.success(`You deleted your reply successfully`);
-          return updatedData;
+          return updateReplyCount(oldData);
         }
-        // Eğer type "original" ise, sadece postu sil
-        toast.success("You deleted your post successfully");
-        return oldData.filter((p) => p._id !== post._id); // Silinen postu listeden çıkar
+        if (!oldData) return oldData;
+        return oldData.filter((p) => p._id !== post._id);
+      });
+
+      queryClient.setQueryData(["posts", post?.parentPost?._id], (oldData: PostType) => {
+        if (!oldData) return oldData;
+        return {
+          ...oldData,
+          replyCount: oldData.replyCount - 1,
+        };
       });
     },
+    onSuccess: () => {
+      if (post.type === "reply") {
+        toast.success(`You deleted your reply successfully`);
+      } else if (post.type === "original") {
+        toast.success("You deleted your post successfully");
+      } else {
+        toast.success("You deleted something successfully");
+      }
+      queryClient.invalidateQueries({ queryKey: ["authUser"] });
+      queryClient.invalidateQueries({ queryKey: ["posts", post.parentPost?._id], exact: true });
+    },
     onError: (error: Error) => {
-      toast.error(error.message);
+      navigate(`${authUser?.username}/status/${postId}`);
+      toast.error(error.message || "An error occurred.");
+      const queriesToInvalidate = [
+        ["authUser"],
+        ["posts"],
+        ["posts", "replies"],
+        ["posts", post?.parentPost?._id],
+      ];
+      queriesToInvalidate.forEach((queryKey) => {
+        queryClient.invalidateQueries({ queryKey });
+      });
     },
   });
 
@@ -81,7 +118,7 @@ const Post = ({ post }: { post: PostType }) => {
   };
 
   return (
-    <Link to={`/${post.user.username}/status/${post._id}`} className="w-full flex flex-col items-start h-fit p-2 xs:p-[15px] border-b border-base-content/10 hover:bg-base-200/50">
+    <Link to={`/${post.user.username}/status/${post._id}`} className="relative w-full flex flex-col items-start h-fit p-2 xs:p-[15px] border-b border-base-content/10 hover:bg-base-200/50">
       {(isDeleting) && (
         <div className="flex justify-center items-center absolute top-0 left-0 w-full h-full bg-base-100/60 z-[1]">
           <LoadingSpinner size="lg" />

@@ -35,10 +35,10 @@ const PostActionsUI = ({
 }: PostActionsUIProps) => {
   const { data: authUser } = useQuery<UserType>({ queryKey: ["authUser"] });
   isLikedOptimistic ?? setIsLikedOptimistic(authUser?.likedPosts.includes(post._id) ?? false);
-  isRepostedOptimistic ?? setIsRepostedOptimistic(authUser?.repostedPosts?.includes(post?._id) ?? false); // Typescript error here but its right bro idk;
+  isRepostedOptimistic ?? setIsRepostedOptimistic(authUser?.repostedPosts?.includes(post?._id as any) ?? false); // Typescript error here but its right bro idk;
   const isLiked = isLikedOptimistic;
   const isReposted = isRepostedOptimistic;
-  const modalName = `comment_${post._id}_modal`;
+  const modalName = `reply_${post._id}_modal`;
 
   return (
     <div className="flex justify-between items-center w-full h-fit fill-neutral">
@@ -67,6 +67,7 @@ const PostActionsUI = ({
             type="reply"
             parentPostId={post._id}
             showAvatar
+            modalName={modalName}
           />
         </Modal>
         <button

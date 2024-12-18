@@ -1,52 +1,9 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { PostType, UserType } from "../../../utils/types";
-import useFollow from "../../hooks/useFollow";
 import toast from "react-hot-toast";
 
 const Actions = () => {
   const queryClient = useQueryClient();
-  const { follow, isPending: isFollowPending } = useFollow();
-
-  const { mutate: deletePost, isPending: isDeleting } = useMutation({
-    mutationFn: async (postId: string) => {
-      try {
-        const res = await fetch(`/api/posts/delete/${postId}`, {
-          method: "DELETE",
-        });
-        const data = await res.json();
-        if (!res.ok)
-          throw new Error(
-            data.error || "An error occurred while deleting the post."
-          );
-        return data;
-      } catch (error) {
-        throw error;
-      }
-    },
-    onSuccess: (data) => {
-      const post = data.post as PostType;
-      queryClient.setQueryData(["posts"], (oldData: PostType[]) => {
-        if (post.type === "reply") {
-          const updatedData = oldData
-            .map((p) => {
-              if (p._id === post.parentPost?._id) {
-                return { ...p, replyCount: p.replyCount - 1 };
-              }
-              return p;
-            })
-            .filter((p) => p._id !== post._id);
-          toast.success(`You deleted your reply successfully`);
-          return updatedData;
-        }
-        // Eğer type "original" ise, sadece postu sil
-        toast.success("You deleted your post successfully");
-        return oldData.filter((p) => p._id !== post._id); // Silinen postu listeden çıkar
-      });
-    },
-    onError: (error: Error) => {
-      toast.error(error.message);
-    },
-  });
 
   const { mutate: likePost, isPending: isLiking } = useMutation({
     mutationFn: async ({postId}: {postId:string}) => {
@@ -131,7 +88,7 @@ const Actions = () => {
     },
   });
 
-  const { mutate: repost, isPending: isReposting } = useMutation({
+  const { mutate: repost, isPending: isReposting, } = useMutation({
     mutationFn: async ({postId}: {postId: string}) => {
       try {
         const res = await fetch(`/api/posts/repost/${postId}`, {
@@ -154,9 +111,8 @@ const Actions = () => {
       setIsReposted: any;
     }) => {
       const authUser = queryClient.getQueryData<UserType>(["authUser"]);
-      const isReposted = authUser?.repostedPosts.includes(postId); //! Typescript Error here but its right bro idk;
+      const isReposted = authUser?.repostedPosts.includes(postId as any) ?? false  //! Typescript Error here but its right bro idk;
       setIsReposted((prev: boolean) => !prev);
-
       // Optimistic Update
       await queryClient.cancelQueries();
 
@@ -196,7 +152,6 @@ const Actions = () => {
       });
     },
     onSuccess: (res) => {
-      console.log("Response:", res);
       // Sunucudan gelen başarı durumunda, cache'i güncelle
       queryClient.setQueryData(["posts"], (oldPosts: PostType[]) => {
         if (!oldPosts) return;
@@ -241,10 +196,6 @@ const Actions = () => {
   };
 
   return {
-    follow,
-    isFollowPending,
-    deletePost,
-    isDeleting,
     likePost,
     isLiking,
     repost,

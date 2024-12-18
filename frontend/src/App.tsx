@@ -11,7 +11,6 @@ import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import Sidebar from "./components/common/Sidebar";
 import RightPanel from "./components/common/RightPanel";
 import React from "react";
-import Header from "./components/common/Header";
 import Dock from "./components/common/Dock";
 import { Toaster } from "react-hot-toast";
 import { useQuery } from "@tanstack/react-query";
@@ -66,7 +65,6 @@ function App() {
         {authUser && (
           <>
             <Sidebar collapse={collapse} setCollapse={setCollapse} />
-            <Header />
           </>
         )}
         <main className="break-words w-full overflow-auto scrollbar-hide">

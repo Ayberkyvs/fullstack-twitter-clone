@@ -8,6 +8,7 @@ import { MdPassword } from "react-icons/md";
 import { SignUpFormType } from "../../../utils/types";
 import toast from "react-hot-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import LoadingSpinner from "../../../components/common/LoadingSpinner";
 
 const LoginPage = () => {
 	const queryClient = useQueryClient();
@@ -90,7 +91,7 @@ const LoginPage = () => {
 						/>
 					</label>
 					<button className='btn rounded-full btn-primary text-white' type="submit">
-						{isPending ? "Signing In" : "Sign In"}
+						{isPending ? <LoadingSpinner size="lg" className="text-primary-content"/> : "Sign In"}
 					</button>
                     <p className="text-xs text-gray-500">By signing in, you agree to the <span className="text-accent">Terms of Service</span> and <span className="text-accent">Privacy Policy</span>, including <span className="text-accent">Cookie Use.</span></p>
                     {isError && <p className='text-error'>{error.message}</p>}
