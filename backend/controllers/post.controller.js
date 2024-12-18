@@ -223,6 +223,7 @@ export const likeUnlikePost = async (req, res) => {
         from: currentUserId,
         to: post.user,
         type: "like",
+        postId: postId,
       });
 
       res.status(200).json(post);
@@ -241,6 +242,7 @@ export const likeUnlikePost = async (req, res) => {
         from: currentUserId,
         to: post.user,
         type: "like",
+        postId: postId,
       });
       await notification.save();
 

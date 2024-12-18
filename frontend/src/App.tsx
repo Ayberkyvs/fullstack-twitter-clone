@@ -17,7 +17,6 @@ import { useQuery } from "@tanstack/react-query";
 import LoadingSpinner from "./components/common/LoadingSpinner";
 import PostPage from "./pages/post/PostPage";
 
-
 function App() {
   const navigate = useNavigate();
   const [collapse, setCollapse] = React.useState(false);
@@ -26,14 +25,21 @@ function App() {
     document.querySelector("html")?.setAttribute("data-theme", localTheme!);
   }, []);
 
-  const { data: authUser, isLoading, isError } = useQuery({
+  const {
+    data: authUser,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ["authUser"],
     queryFn: async () => {
       try {
         const res = await fetch("/api/auth/me");
         const data = await res.json();
         if (data.error) return null;
-        if (!res.ok) throw new Error(data.error || "An error occurred while fetching user");
+        if (!res.ok)
+          throw new Error(
+            data.error || "An error occurred while fetching user"
+          );
         return data;
       } catch (error) {
         throw error;
@@ -44,13 +50,16 @@ function App() {
     refetchInterval: 1000 * 60 * 5,
   });
 
-  if (isLoading) return <div className="flex justify-center items-center w-full h-screen"><LoadingSpinner size="lg"/></div>;
+  if (isLoading)
+    return (
+      <div className="flex justify-center items-center w-full h-screen">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
   if (isError) navigate("/login");
   return (
     <>
-      <Toaster
-      position="bottom-center"
-      reverseOrder={false}/>
+      <Toaster position="bottom-center" reverseOrder={false} />
       <div
         className={`${
           authUser

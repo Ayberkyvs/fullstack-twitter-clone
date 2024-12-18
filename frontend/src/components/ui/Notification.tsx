@@ -61,12 +61,12 @@ const Notification = ({ notification }: { notification: any }) => {
                 <span className="text-neutral text-base">
                   {notification?.replyContext}
                 </span>
-                <EmbedPost post={notification.postId} isSmall />
+                <EmbedPost post={notification?.postId} isSmall />
               </div>
             </p>
           )}
-          {notification.type === "repost" && (
-            <EmbedPost post={notification.postId} isSmall />
+          {(notification.type === "repost" || notification.type === "like") && (
+            <EmbedPost post={notification?.postId} isSmall />
           )}
         </div>
       </div>
