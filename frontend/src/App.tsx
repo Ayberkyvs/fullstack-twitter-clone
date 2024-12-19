@@ -16,6 +16,7 @@ import { Toaster } from "react-hot-toast";
 import { useQuery } from "@tanstack/react-query";
 import LoadingSpinner from "./components/common/LoadingSpinner";
 import PostPage from "./pages/post/PostPage";
+import FollowersFollowing from "./pages/profile/FollowersFollowing";
 
 function App() {
   const navigate = useNavigate();
@@ -111,6 +112,14 @@ function App() {
             <Route
               path="/:username"
               element={authUser ? <ProfilePage /> : <Navigate to="/login" />}
+            />
+            <Route
+              path="/:username/followers"
+              element={authUser ? <FollowersFollowing /> : <Navigate to="/login" />}
+            />
+            <Route
+              path="/:username/following"
+              element={authUser ? <FollowersFollowing /> : <Navigate to="/login" />}
             />
             <Route
               path="/:username/status/:id"

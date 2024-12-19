@@ -1,9 +1,8 @@
-import React from 'react'
-
-const NotFound = () => {
+import Logo from '../svgs/Logo'
+const NotFound = ({className, errorMessage}: {className: string, errorMessage: string}) => {
   return (
-    <div>
-        <h1>404 - Not Found!</h1>
+    <div className={`flex flex-col items-center justify-center w-full h-full ${className}`}>
+        <h1 className='text-base'>{errorMessage}</h1>
     </div>
   )
 }

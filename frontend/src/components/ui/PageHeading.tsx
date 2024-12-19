@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import React from "react";
 import CurrentUser from "./CurrentUser";
 import Logo from "../svgs/Logo";
-import { menuItems } from "../../utils/config";
+import MenuItems from "../../utils/MenuItems";
 const PageHeading = ({
   title,
   subtitle,
@@ -20,6 +20,8 @@ const PageHeading = ({
   headerMobile: boolean;
 }) => {
   const navigate = useNavigate();
+  const menuItems = MenuItems();
+
   const { data: authUser } = useQuery<UserType>({ queryKey: ["authUser"] });
   const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
 React.useEffect(() => {
@@ -27,7 +29,7 @@ React.useEffect(() => {
 }, [isDrawerOpen]);
   if (headerMobile) {
     return (
-        <div className="sticky top-0 xs:hidden drawer z-[2] border shadow-xl">
+        <div className="sticky top-0 xs:hidden drawer z-[2]">
             <input
                 id="my-drawer"
                 type="checkbox"
@@ -45,7 +47,7 @@ React.useEffect(() => {
                         role="button"
                         className="btn btn-ghost btn-circle avatar drawer-button"
                     >
-                        <div className="w-8 rounded-full">
+                        <div className="w-10 rounded-full">
                             <img
                                 src={authUser?.profileImg !== null && authUser?.profileImg || "/avatar-placeholder.png"}
                                 alt={`${authUser?.fullName} avatar`}

@@ -15,6 +15,7 @@ import EmbedPost from "../../components/common/EmbedPost";
 import CreatePost from "../home/CreatePost";
 import NotFound from "../../components/common/NotFound";
 import PostSkeleton from "../../components/skeletons/PostSkeleton";
+import findBadge from "../../utils/findBadge";
 
 const PostPage = () => {
   const param = useParams();
@@ -87,7 +88,7 @@ const PostPage = () => {
   return (
     <div className="flex flex-col justify-center items-start w-full">
       <PageHeading title="Post" headerMobile={false}/>
-      {isPostError && <NotFound />}
+      {isPostError && <NotFound className="mt-2" errorMessage="Post Not Found!"/>}
 
       {isPostLoading && <PostSkeleton />}
       {post && !isPostLoading && (
@@ -99,7 +100,7 @@ const PostPage = () => {
                 className="flex-shrink-0 w-8 h-8 xs:w-10 xs:h-10"
               />
               <div>
-                <h1 className="font-bold text-base">{user.fullName}</h1>
+                <h1 className="flex gap-1 w-fit font-bold text-base">{user.fullName} {user?.badge && findBadge(user?.badge)}</h1>
                 <p className="text-neutral">@{user.username}</p>
               </div>
             </div>

@@ -23,7 +23,7 @@ const ExplorePage = () => {
         <PageHeading headerMobile title/>
         <Tabs activeTab={exploreType} setActiveTab={setExploreType} tabs={tabs}/>
         <div className={`flex flex-col ${exploreType === "trending" ? "" : "p-4 gap-2"}`}>
-          <Explore exploreType={exploreType} className={`${exploreType === "trending" ? "p-5 gap-5" : "gap-5"}`} limit={20}/>
+          <Explore exploreType={exploreType} className={`${exploreType === "trending" ? "p-5 gap-5" : "gap-5"}`} limit={20} showBio/>
         </div>
     </div>
   )

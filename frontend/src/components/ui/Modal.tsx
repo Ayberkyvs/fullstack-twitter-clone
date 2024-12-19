@@ -3,18 +3,20 @@ const Modal = ({
   className,
   children,
   modalName,
+  modalBoxClassName,
   trigger,
 }: {
   className?: string;
   children: React.ReactNode;
   modalName: string;
+  modalBoxClassName?: string;
   trigger: React.ReactNode;
 }) => {
   return (
     <>
     {trigger}
     <dialog id={modalName} className={`modal ${className}`}>
-      <div className="modal-box">
+      <div className={`modal-box ${modalBoxClassName}`}>
         {children}
       </div>
       <form method="dialog" className="modal-backdrop">

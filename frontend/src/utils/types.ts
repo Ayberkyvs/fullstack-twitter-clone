@@ -9,6 +9,10 @@ export type UserType = {
 	_id: string;
 	fullName: string;
 	username: string;
+	email: string;
+	bio: string | null;
+	link: string | null;
+	badge?: string;
 	profileImg: string;
 	createdAt: string;
 	likedPosts: string[];
@@ -51,7 +55,7 @@ export type NotificationType = {
 	createdAt: string;
 }
 
-export type MenuItems = {
+export type MenuItemsType = {
     [key: string]: {
         icon: JSX.Element;
 		activeIcon: JSX.Element;

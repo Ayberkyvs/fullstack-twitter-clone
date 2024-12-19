@@ -5,16 +5,18 @@ import User from "./User";
 import React from "react";
 import useFollow from "../hooks/useFollow";
 import { HashtagType, UserType } from "../../utils/types";
-import {v4 as uuidv4} from "uuid";
+import { v4 as uuidv4 } from "uuid";
 import LoadingSpinner from "../common/LoadingSpinner";
 const Explore = ({
   exploreType,
   className,
   limit,
+  showBio
 }: {
   exploreType: "suggested" | "trending";
   className?: string;
   limit: number;
+  showBio?: boolean;
 }) => {
   const getSectionContent = () => {
     switch (exploreType) {
@@ -39,7 +41,7 @@ const Explore = ({
         if (!res.ok)
           throw new Error(data.error || "An error occurred while fetching.");
         return data;
-      } catch (error) {
+      } catch (error: Error | any) {
         console.error(error.message);
         throw error;
       }
@@ -51,7 +53,7 @@ const Explore = ({
     refetch();
   }, [exploreType, refetch]);
 
-  const {follow, isPending:isFollowPending} = useFollow();
+  const { follow, isPending: isFollowPending } = useFollow();
   //! Burada hata var herkese pending
   return (
     <div className={`flex flex-col ${className}`}>
@@ -71,23 +73,29 @@ const Explore = ({
             <User
               key={uuidv4()}
               user={item as UserType}
+              showBio={showBio}
               rightButton={
                 <button
-                  title="Follow"
-                  type="button"
-                  className="btn btn-xs hover:bg-base-content/60 bg-base-content text-base-100 w-fit h-[40px] px-4 text-base font-bold rounded-full"
+                  className="btn btn-primary rounded-full btn-sm"
                   onClick={() => follow((item as UserType)._id)}
+                  type="button"
                 >
-                  {isFollowPending ? <LoadingSpinner size="sm" /> : "Follow"}
+                  {isFollowPending ? (
+                    <LoadingSpinner
+                      size="sm"
+                      className="text-primary-content"
+                    />
+                  ) : (
+                    "Follow"
+                  )}
                 </button>
               }
             />
           ) : (
-            <div
-              className="flex flex-col w-full h-fit"
-              key={uuidv4()}
-            >
-              <h6 className="text-base font-bold">#{(item as HashtagType).tag}</h6>
+            <div className="flex flex-col w-full h-fit" key={uuidv4()}>
+              <h6 className="text-base font-bold">
+                #{(item as HashtagType).tag}
+              </h6>
               <span className="text-sm text-neutral">
                 {(item as HashtagType).usageCount} posts
               </span>

@@ -1,6 +1,5 @@
 import { useRef, useState } from "react";
 import { IoCloseSharp } from "react-icons/io5";
-import { FaRegSmile } from "react-icons/fa";
 import { GoImage } from "react-icons/go";
 import toast from "react-hot-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -86,25 +85,6 @@ const CreatePost = ({ className, type = "original", parentPostId, showAvatar, mo
     //   });
     // },
     onSuccess: (data) => {
-      // queryClient.setQueryData(["posts"], (oldData: PostType[]) => {
-      //   if (type === "reply") {
-      //     // Eğer type "reply" ise, parent postun replyCount'unu arttır ve yeni postu ekle
-      //     const updatedData = oldData.map((p) => {
-      //       if (p._id === parentPostId) {
-      //         return { ...p, replyCount: p.replyCount + 1 };
-      //       }
-      //       return p;
-      //     });
-      //     toast.success('You replied successfully');
-      //     // Yeni postu eklerken güncellenmiş veriyi kullanıyoruz
-      //     return [data, ...updatedData];
-      //   }
-      //   // Eğer type "original" ise, sadece yeni postu ekle
-      //   toast.success("You posted successfully");
-      //   return [data, ...oldData];
-      // });
-
-
       const updateReplyCount = (oldData: PostType[]) => {
         if (!oldData) return oldData;
         const updatedData = oldData
@@ -224,7 +204,7 @@ const CreatePost = ({ className, type = "original", parentPostId, showAvatar, mo
                 }
               }}
             />
-            <FaRegSmile className="fill-primary w-5 h-5 cursor-pointer" />
+            {/* <FaRegSmile className="fill-primary w-5 h-5 cursor-pointer" /> */}
           </div>
           <input type="file" accept="image/*" hidden ref={imgRef} onChange={handleImgChange} />
           <button className="btn btn-primary rounded-full btn-sm px-4" type="submit" onClick={handleSubmit}>

@@ -22,6 +22,7 @@ const HomePage = () => {
       <Modal
         modalName="create_post_model_2"
         className=""
+        modalBoxClassName="p-0 py-2"
         trigger={
           <button
             type="button"

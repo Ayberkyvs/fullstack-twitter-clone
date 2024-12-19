@@ -1,8 +1,10 @@
-import {menuItems} from '../../utils/config'
+import MenuItems from '../../utils/MenuItems'
 import { Link, useLocation } from 'react-router-dom'
 const Dock = () => {
     const location = useLocation();
     let pathname = location.pathname;
+    const menuItems = MenuItems();
+
     return (
         <div className="fixed xs:hidden bottom-0 z-[1] btm-nav text-lg">
             {Object.keys(menuItems).map((key) => {

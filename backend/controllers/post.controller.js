@@ -4,6 +4,8 @@ import Post from "../models/post.model.js";
 import User from "../models/user.model.js";
 import Notification from "../models/notification.model.js";
 import { v2 as cloudinary } from "cloudinary";
+import { fetchPosts } from "../lib/utils/fetchPosts.js";
+import { sortPostsByDate } from "../lib/utils/sortPostsByDate.js";
 
 export const getPostById = async (req, res) => {
   const postId = req.params.id;
@@ -28,6 +30,158 @@ export const getPostById = async (req, res) => {
     res.status(200).json(post);
   } catch (error) {
     console.error("Error in getPostById controller: " + error.message);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+export const getAllPosts = async (req, res) => {
+  try {
+    const posts = await Post.find({ type: "original" })
+      .select("-likes")
+      .sort({ createdAt: -1 })
+      .populate({ path: "user", select: "-password" });
+    if (posts.length <= 0) return res.status(200).json([]);
+    res.status(200).json(posts);
+  } catch (error) {
+    console.error("Error in getAllPosts controller: " + error.message);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+export const getLikedPosts = async (req, res) => {
+  const currentUserId = req.user._id;
+  try {
+    const user = await User.findById(currentUserId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+    const likedPosts = await Post.find({
+      _id: {
+        $in: user.likedPosts,
+      },
+    })
+      .populate({ path: "user", select: "-password" })
+
+    if (likedPosts.length <= 0) return res.status(200).json([]);
+
+    return res.status(200).json(likedPosts);
+  } catch (error) {
+    console.error("Error in getLikedPosts controller: " + error.message);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+export const getFollowingPosts = async (req, res) => {
+  try {
+    const currentUserId = req.user._id;
+    const user = await User.findById(currentUserId).populate("following");
+
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const following = user.following;
+
+    // Fetch normal posts
+    const normalPosts = await fetchPosts(
+      { user: { $in: following.map((f) => f._id) } },
+      { createdAt: -1 },
+      [
+        { path: "user", select: "-password" },
+        {
+          path: "parentPost",
+          select: "-likes -childPosts",
+          populate: { path: "user", select: "+username +fullName" },
+        },
+      ]
+    );
+
+    // Fetch reposted posts
+    const repostedPostsPromises = following.map(async (followedUser) => {
+      const repostedPosts = await fetchPosts(
+        { _id: { $in: followedUser.repostedPosts.map((r) => r._id) } },
+        { createdAt: -1 },
+        [{ path: "user", select: "-password" }]
+      );
+
+      repostedPosts.forEach((post) => {
+        post.repostedBy = followedUser;
+        post.repostedAt = followedUser.repostedPosts.find(
+          (r) => r._id.toString() === post._id.toString()
+        )?.updatedAt;
+        post.type = "repost";
+      });
+
+      return repostedPosts;
+    });
+
+    const repostedPosts = (await Promise.all(repostedPostsPromises)).flat();
+
+    // Merge and sort posts
+    const feedPosts = sortPostsByDate([...normalPosts, ...repostedPosts]);
+
+    if (!feedPosts.length) return res.status(200).json([]);
+
+    return res.status(200).json(feedPosts);
+  } catch (error) {
+    console.error("Error in getFollowingPosts controller:", error.message);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+export const getUserPosts = async (req, res) => {
+  try {
+    const { username } = req.params;
+    if (!username)
+      return res.status(400).json({ message: "Username is required" });
+
+    const user = await User.findOne({ username }).populate("repostedPosts");
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    // Kullanıcının kendi gönderilerini al
+    const userPosts = await fetchPosts(
+      { user: user._id },
+      { createdAt: -1 },
+      [{ path: "user", select: "-password" }]
+    );
+
+    // Kullanıcının repostladığı gönderileri al
+    const repostedPosts = await fetchPosts(
+      { _id: { $in: user.repostedPosts.map((r) => r._id) } },
+      { createdAt: -1 },
+      [{ path: "user", select: "-password" }]
+    );
+
+    console.log(repostedPosts)
+    // Repostlara ek bilgi ekle
+    repostedPosts.forEach((post) => {
+      post.repostedBy = user; // Repost eden kullanıcı bilgisi
+      post.repostedAt = user.repostedPosts.find(
+        (r) => r._id.toString() === post._id.toString()
+      )?.updatedAt; // Repost tarihi
+      post.type = "repost"; // Gönderi tipi
+    });
+
+    // Gönderileri birleştir ve sıralamayı yap
+    const allPosts = sortPostsByDate([...repostedPosts, ...userPosts]);
+
+    if (!allPosts.length) return res.status(200).json([]);
+
+    return res.status(200).json(allPosts);
+  } catch (error) {
+    console.error("Error in getUserPosts controller:", error.message);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+export const getPostReplies = async (req, res) => {
+  try {
+    const postId = req.params.id;
+    if (!postId)
+      return res.status(400).json({ message: "Post ID is required" });
+    const post = await Post.find({ parentPost: postId })
+      .sort({ createdAt: 1 })
+      .populate({ path: "user", select: "-password" });
+    if (!post) return res.status(404).json({ message: "Post not found" });
+    res.status(200).json(post);
+  } catch (error) {
+    console.error("Error in getPostReplies controller: " + error.message);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
@@ -175,18 +329,20 @@ export const deletePost = async (req, res) => {
       }
     }
 
-    const user = await User.find({repostedPosts: post._id}).select("_id repostedPosts");
-    console.log("Bu gonderiyi repost edenler: ", user);
-    if (user) {
-      const bulkOperations = user.map((u) => ({
-        updateOne: {
-          filter: { _id: u._id },
-          update: {
-            $pull: { repostedPosts: { _id: post._id } },
-          },
+    const users = await User.find({
+      $or: [{ repostedPosts: post._id }, { likedPosts: post._id }],
+    }).select("_id repostedPosts likedPosts");
+
+    if (users.length > 0) {
+      const userBulkOperations = users.map((user) => ({
+      updateOne: {
+        filter: { _id: user._id },
+        update: {
+        $pull: { repostedPosts: post._id, likedPosts: post._id },
         },
+      },
       }));
-      await User.bulkWrite(bulkOperations);
+      await User.bulkWrite(userBulkOperations);
     }
 
     await Post.findByIdAndDelete(req.params.id);
@@ -254,131 +410,6 @@ export const likeUnlikePost = async (req, res) => {
   }
 };
 
-export const getAllPosts = async (req, res) => {
-  try {
-    const posts = await Post.find({ type: "original" })
-      .select("-likes")
-      .sort({ createdAt: -1 })
-      .populate({ path: "user", select: "-password" });
-
-    if (posts.length <= 0) return res.status(200).json([]);
-    res.status(200).json(posts);
-  } catch (error) {
-    console.error("Error in getAllPosts controller: " + error.message);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-};
-
-export const getLikedPosts = async (req, res) => {
-  const currentUserId = req.user._id;
-  try {
-    const user = await User.findById(currentUserId);
-    if (!user) return res.status(404).json({ message: "User not found" });
-    const likedPosts = await Post.find({
-      _id: {
-        $in: user.likedPosts,
-      },
-    })
-      .populate({ path: "user", select: "-password" })
-      .populate({ path: "comments.user", select: "-password" });
-
-    if (likedPosts.length <= 0) return res.status(200).json([]);
-
-    return res.status(200).json(likedPosts);
-  } catch (error) {
-    console.error("Error in getLikedPosts controller: " + error.message);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-};
-
-export const getFollowingPosts = async (req, res) => {
-  try {
-    const currentUserId = req.user._id;
-    // Find user and populate 'following' field
-    const user = await User.findById(currentUserId).populate("following");
-    if (!user) return res.status(404).json({ message: "User not found" });
-
-    const following = user.following;
-
-    // 1. Get normal posts from users being followed
-    const normalPosts = await Post.find({
-      user: { $in: following.map((f) => f._id) },
-    })
-      .select("-likes -childPosts")
-      .sort({ createdAt: -1 })
-      .populate({ path: "user", select: "-password" })
-      .populate({
-        path: "parentPost",
-        select: "-likes -childPosts",
-        populate: { path: "user", select: "+username +fullName" },
-      })
-      .lean(); // Use lean to work with plain JavaScript objects
-
-    // 2. Get reposted posts and include reposting user info
-    const repostedPostsPromises = following.map(async (followedUser) => {
-      const repostedPosts = await Post.find({
-        _id: { $in: followedUser.repostedPosts.map((r) => r._id) },
-      })
-        .select("-likes -childPosts")
-        .sort({ createdAt: -1 })
-        .populate({ path: "user", select: "-password" })
-        .lean(); // Use lean for plain objects
-
-      // Add repostedAt field to each reposted post
-      repostedPosts.forEach((post) => {
-        post.repostedBy = followedUser; // Add reposting user information
-        post.repostedAt = followedUser.repostedPosts.find(
-          (r) => r._id.toString() === post._id.toString()
-        )?.createdAt; // Use repost timestamp if available
-        post.type = "repost"; // Add type field to distinguish reposted posts
-      });
-
-      return repostedPosts;
-    });
-
-    const repostedPosts = (await Promise.all(repostedPostsPromises)).flat();
-
-    // 3. Merge normal posts and reposted posts
-    const feedPosts = [...normalPosts, ...repostedPosts];
-
-    // Sort the posts by either createdAt (for normal posts) or repostedAt (for reposted posts)
-    feedPosts.sort((a, b) => {
-      const dateA = a.repostedAt || a.createdAt; // Use repostedAt if present
-      const dateB = b.repostedAt || b.createdAt; // Use repostedAt if present
-      return new Date(dateB) - new Date(dateA); // Compare the dates
-    });
-
-    // If no posts found, return empty array
-    if (feedPosts.length <= 0) return res.status(200).json([]);
-
-    // Return the feed posts
-    console.log("feed posts", feedPosts);
-    return res.status(200).json(feedPosts);
-  } catch (error) {
-    console.error("Error in getFollowingPosts controller: " + error.message);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-};
-
-export const getUserPosts = async (req, res) => {
-  try {
-    const { username } = req.params;
-    if (!username)
-      return res.status(400).json({ message: "Username is required" });
-    const user = await User.findOne({ username });
-    if (!user) return res.status(404).json({ message: "User not found" });
-    const posts = await Post.find({ user: user._id })
-      .sort({ createdAt: -1 })
-      .populate({ path: "user", select: "-password" })
-      .populate({ path: "comments.user", select: "-password" });
-    if (posts.length <= 0) return res.status(200).json([]);
-    return res.status(200).json(posts);
-  } catch (error) {
-    console.error("Error in getUserPosts controller: " + error.message);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-};
-
 export const repostPost = async (req, res) => {
   try {
     const currentUserId = req.user._id.toString();
@@ -409,8 +440,6 @@ export const repostPost = async (req, res) => {
     const alreadyReposted = user.repostedPosts?.some(
       (repost) => repost?._id.toString() === postId
     );
-
-    console.log("Already reposted: " + alreadyReposted);
 
     if (alreadyReposted) {
       // If already reposted, remove it
@@ -444,22 +473,6 @@ export const repostPost = async (req, res) => {
     res.status(200).json(repostedPost);
   } catch (error) {
     console.error("Error in repostPost controller: " + error.message);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-};
-
-export const getPostReplies = async (req, res) => {
-  try {
-    const postId = req.params.id;
-    if (!postId)
-      return res.status(400).json({ message: "Post ID is required" });
-    const post = await Post.find({ parentPost: postId })
-      .sort({ createdAt: 1 })
-      .populate({ path: "user", select: "-password" });
-    if (!post) return res.status(404).json({ message: "Post not found" });
-    res.status(200).json(post);
-  } catch (error) {
-    console.error("Error in getPostReplies controller: " + error.message);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };

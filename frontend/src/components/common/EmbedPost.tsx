@@ -4,7 +4,8 @@ import { formatDate } from "../../utils/formatDate";
 import renderTextWithHashtags from "../../utils/renderWithHashtags";
 
 const EmbedPost = ({ post, isSmall }: { post: PostType; isSmall: boolean }) => {
-  const {text, img} = post && post;
+  if (!post) return null;
+  const {text, img} = post;
   return (
     <Link
       to={`/${post.user.username}/status/${post._id}`}

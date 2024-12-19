@@ -1,32 +1,31 @@
 import React from "react";
 import { UserType } from "../../utils/types";
-import { Link } from "react-router-dom";
+import Avatar from "../common/Avatar";
+import findBadge from "../../utils/findBadge";
 
 const User = ({
   user,
   rightButton,
+  showBio = false,
 }: {
   user: UserType;
   rightButton?: React.ReactNode;
+  showBio?: boolean;
 }) => {
   return (
-    <div className="grid grid-cols-[auto_1fr_auto] items-center w-full h-fit gap-3">
-      <Link to={`/${user.username}`} className="avatar">
-        <div className="w-10 h-10 rounded-full">
-          <img
-            src={user?.profileImg || "/avatar-placeholder.png"}
-            alt={`${user?.fullName || "User"} profile picture`}
-          />
-        </div>
-      </Link>
-      <div className="w-fit items-start h-full">
-        <div className="flex gap-[4px] text-base font-bold">
+    <div className="grid grid-cols-[auto_1fr_auto] items-start w-full h-fit gap-3">
+      <Avatar user={user} className="w-11" />
+      <div className="w-fit items-start h-full gap-1">
+        <div className="flex items-center gap-1 text-base font-bold">
           <h3>{user.fullName}</h3>
-          {/* <span>Badge</span> */}
+          {user?.badge && <span>{findBadge(user?.badge)}</span>}
         </div>
         <div className="flex text-base-content/35 text-sm">
           <span>@{user.username}</span>
         </div>
+        {showBio && <p className="text-neutral text-xs mt-2 overflow-ellipsis">
+          {user?.bio}
+        </p>}
       </div>
       {rightButton}
     </div>

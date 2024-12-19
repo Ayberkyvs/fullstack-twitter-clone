@@ -17,6 +17,7 @@ import EmbedPost from "./EmbedPost";
 import renderTextWithHashtags from "../../utils/renderWithHashtags";
 import Avatar from "./Avatar";
 import PostActions from "./postActions";
+import findBadge from "../../utils/findBadge";
 
 const Post = ({ post }: { post: PostType }) => {
   const navigate = useNavigate();
@@ -147,9 +148,9 @@ const Post = ({ post }: { post: PostType }) => {
         />
         <div className="flex flex-col w-full h-fit gap-1">
           <div className="grid grid-rows-2 grid-cols-1 xs:grid-rows-none xs:grid-cols-[auto_1fr] gap-[2px] xs:gap-2">
-            <div className="flex w-fit h-fit justify-center items-start gap-[4px] text-base font-bold">
+            <div className="flex w-fit h-fit justify-center items-center gap-[4px] text-base font-bold">
               <h3>{post.user.fullName}</h3>
-              {/* <span>Badge</span> */}
+              {post.user?.badge && <span>{findBadge(post.user?.badge)}</span>}
             </div>
             <div className="flex w-full h-fit justify-between items-center text-neutral">
               <span>

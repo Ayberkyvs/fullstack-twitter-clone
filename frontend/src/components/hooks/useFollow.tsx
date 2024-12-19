@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation,useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
 const useFollow = () => {
@@ -21,6 +21,7 @@ const useFollow = () => {
             Promise.all([
                 queryClient.invalidateQueries({queryKey: ["suggested"]}),
                 queryClient.invalidateQueries({queryKey: ["authUser"]}),
+                queryClient.invalidateQueries({queryKey: ["userProfile"]}),
             ]);
             toast.success(data.message);
         },

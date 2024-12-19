@@ -1,7 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import Logo from "../svgs/Logo";
 import { GoSidebarExpand, GoSidebarCollapse } from "react-icons/go";
-import { menuItems } from "../../utils/config";
+import MenuItems from "../../utils/MenuItems";
 import { IoSend } from "react-icons/io5";
 import Modal from "../ui/Modal";
 import CreatePost from "../../pages/home/CreatePost";
@@ -15,6 +15,7 @@ const Sidebar = ({
 }) => {
   const location = useLocation();
   let pathname = location.pathname;
+  const menuItems = MenuItems();
 
   return (
     <div
@@ -50,6 +51,8 @@ const Sidebar = ({
           <li className="w-full mt-5 px-2">
             <Modal
               modalName="create_post_model"
+              modalBoxClassName="p-0 py-4"
+              className="p-0"
               trigger={
                 <button
                   className="btn btn-primary font-bold rounded-full p-0 py-2 w-full"

@@ -10,7 +10,11 @@ import { isUsernameAndEmailValid } from '../lib/utils/isUsernameAndEmailValid.js
 export const getUserProfile = async (req, res) => {
     const { username } = req.params;
     try {
-        const user = await User.findOne({username}).select('-password');
+        const user = await User.findOne({username})
+            .select('-password')
+            .populate('followers', 'fullName username profileImg')
+            .populate('following', 'fullName username profileImg');
+        
         if (!user) return res.status(404).json({error: 'User not found'});
         res.status(200).json(user);
     } catch (error) {
@@ -60,7 +64,6 @@ export const followUnfollowUser = async (req, res) => {
                 type: 'follow',
             });
 
-            console.log(notification);
             await notification.save();
             res.status(200).json({message: 'User followed successfully'});
         }
@@ -71,7 +74,6 @@ export const followUnfollowUser = async (req, res) => {
 };
 
 export const updateUserProfile = async (req, res) => {
-    //! 
     const {fullName, username, email, bio, link, currentPassword, newPassword} = req.body;
     let { profileImg, coverImg } = req.body;
     const currentUserId = req.user._id;
@@ -93,7 +95,7 @@ export const updateUserProfile = async (req, res) => {
                 const imgId = imgPath.split(".")[0];
                 await cloudinary.uploader.destroy(imgId);
             }
-            const res = await cloudinary.uploader.upload(img, {folder:`${currentUserId}`, format: 'webp', allowed_formats: ["webp", "png", "jpg", "jpeg"], transformation: [{quality: "auto"}, {fetch_format: "auto"}]});
+            const res = await cloudinary.uploader.upload(profileImg, {folder:`${currentUserId}`, format: 'webp', allowed_formats: ["webp", "png", "jpg", "jpeg"], transformation: [{quality: "auto"}, {fetch_format: "auto"}]});
             profileImg = res.secure_url;
         }
 
@@ -104,7 +106,7 @@ export const updateUserProfile = async (req, res) => {
                 const imgId = imgPath.split(".")[0];
                 await cloudinary.uploader.destroy(imgId);
             }
-            const res = await cloudinary.uploader.upload(img, {folder:`${currentUserId}`, format: 'webp', allowed_formats: ["webp", "png", "jpg", "jpeg"], transformation: [{quality: "auto"}, {fetch_format: "auto"}]});
+            const res = await cloudinary.uploader.upload(coverImg, {folder:`${currentUserId}`, format: 'webp', allowed_formats: ["webp", "png", "jpg", "jpeg"], transformation: [{quality: "auto"}, {fetch_format: "auto"}]});
             coverImg = res.secure_url;
         }
 
