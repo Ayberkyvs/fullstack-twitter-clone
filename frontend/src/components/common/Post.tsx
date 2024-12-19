@@ -144,16 +144,16 @@ const Post = ({ post }: { post: PostType }) => {
       <div className="flex w-full h-fit gap-3">
         <Avatar
           user={post.user}
-          className="flex-shrink-0 w-8 h-8 xs:w-10 xs:h-10"
+          className="w-9 h-9 xs:w-10 xs:h-10"
         />
         <div className="flex flex-col w-full h-fit gap-1">
           <div className="grid grid-rows-2 grid-cols-1 xs:grid-rows-none xs:grid-cols-[auto_1fr] gap-[2px] xs:gap-2">
-            <div className="flex w-fit h-fit justify-center items-center gap-[4px] text-base font-bold">
+            <div className="flex w-fit h-fit justify-center items-center gap-1 text-base font-bold">
               <h3>{post.user.fullName}</h3>
               {post.user?.badge && <span>{findBadge(post.user?.badge)}</span>}
             </div>
             <div className="flex w-full h-fit justify-between items-center text-neutral">
-              <span>
+              <span className="text-sm xs:text-base">
                 @{post.user.username} · {formatDate(post.createdAt)}
               </span>
               <DropdownSettings buttonClassName="m-0 h-full">
@@ -198,7 +198,7 @@ const Post = ({ post }: { post: PostType }) => {
               <div className="w-fit h-fit mt-2">
                 <img
                   src={post.img}
-                  className="w-fit max-w-full h-fit max-h-[418px] object-fit rounded border border-neutral/30"
+                  className="w-fit max-w-full h-fit max-h-[418px] object-cover rounded border border-neutral/30"
                   alt="Post"
                 />
               </div>

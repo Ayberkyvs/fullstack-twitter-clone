@@ -6,7 +6,7 @@ const Dock = () => {
     const menuItems = MenuItems();
 
     return (
-        <div className="fixed xs:hidden bottom-0 z-[1] btm-nav text-lg">
+        <div className="fixed xs:hidden bottom-0 z-[1] btm-nav text-lg shadow-inner shadw-lg">
             {Object.keys(menuItems).map((key) => {
                 const isActive = menuItems[key].link === pathname;
                 if (menuItems[key].inDock) {

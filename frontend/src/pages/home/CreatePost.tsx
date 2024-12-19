@@ -201,9 +201,9 @@ const CreatePost = ({
   const textLength = text.length;
   return (
     <div
-      className={`flex w-full h-fit min-h-[150px] p-4 items-start gap-4 ${className}`}
+      className={`flex w-full h-fit min-h-[150px] px-4 py-2 xs:p-4 items-start gap-4 ${className}`}
     >
-      {showAvatar && <Avatar user={authUser} className="w-12" />}
+      {showAvatar && <Avatar user={authUser} className="w-10 h-10 xs:w-12 xs:h-12 flex-shrink-0" />}
       <form
         className="flex flex-col gap-2 w-full h-full"
         onSubmit={handleSubmit}

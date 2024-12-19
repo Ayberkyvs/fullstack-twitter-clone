@@ -57,8 +57,7 @@ export const getLikedPosts = async (req, res) => {
       _id: {
         $in: user.likedPosts,
       },
-    })
-      .populate({ path: "user", select: "-password" })
+    }).populate({ path: "user", select: "-password" });
 
     if (likedPosts.length <= 0) return res.status(200).json([]);
 
@@ -135,11 +134,9 @@ export const getUserPosts = async (req, res) => {
     if (!user) return res.status(404).json({ message: "User not found" });
 
     // Kullanıcının kendi gönderilerini al
-    const userPosts = await fetchPosts(
-      { user: user._id },
-      { createdAt: -1 },
-      [{ path: "user", select: "-password" }]
-    );
+    const userPosts = await fetchPosts({ user: user._id }, { createdAt: -1 }, [
+      { path: "user", select: "-password" },
+    ]);
 
     // Kullanıcının repostladığı gönderileri al
     const repostedPosts = await fetchPosts(
@@ -202,7 +199,9 @@ export const createPost = async (req, res) => {
     if (postType === "reply" && !parentPostId)
       return res.status(400).json({ message: "Parent post ID is required" });
     if (text && text.length > 250)
-      return res.status(400).json({ message: "Text character limit is 250 word." });
+      return res
+        .status(400)
+        .json({ message: "Text character limit is 250 word." });
     if (img) {
       const uploadedResponse = await cloudinary.uploader.upload(img, {
         folder: `${currentUserId}/posts`,
@@ -336,12 +335,12 @@ export const deletePost = async (req, res) => {
 
     if (users.length > 0) {
       const userBulkOperations = users.map((user) => ({
-      updateOne: {
-        filter: { _id: user._id },
-        update: {
-        $pull: { repostedPosts: post._id, likedPosts: post._id },
+        updateOne: {
+          filter: { _id: user._id },
+          update: {
+            $pull: { repostedPosts: post._id, likedPosts: post._id },
+          },
         },
-      },
       }));
       await User.bulkWrite(userBulkOperations);
     }
@@ -433,7 +432,7 @@ export const repostPost = async (req, res) => {
     if (!user.repostedPosts) {
       user.repostedPosts = [];
       await user.save();
-    };
+    }
 
     // Check if the post is already reposted
     const alreadyReposted = user.repostedPosts?.some(

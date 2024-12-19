@@ -38,8 +38,6 @@ const Posts = ({feedType, username, userId}: {feedType: string, username?: strin
 				throw error;
 			}
 		},
-		refetchOnMount: true,
-		refetchOnWindowFocus: true,
 		refetchInterval: 1000 * 60 * 1,
 	});
 
@@ -49,7 +47,7 @@ const Posts = ({feedType, username, userId}: {feedType: string, username?: strin
 	return (
 	<div className='flex flex-col justify-center border-t border-base-content/10 '>
 		{(isLoading || isRefetching) &&
-			Array.from({ length: 4 }).map((_, index) => (
+			Array.from({ length: 3 }).map((_, index) => (
 				<PostSkeleton key={index} />
 			))
 		}

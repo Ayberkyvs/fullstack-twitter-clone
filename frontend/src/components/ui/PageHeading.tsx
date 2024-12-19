@@ -37,7 +37,7 @@ React.useEffect(() => {
                 className="drawer-toggle"
                 onChange={(e) => setIsDrawerOpen(e.target.checked)} // Drawer state kontrolü
             />
-            <div className="drawer-content overflow-hidden">
+            <div className={`drawer-content overflow-hidden ${className}`}>
                 {/* Page content here */}
                 <div
                     className="relative flex xs:hidden navbar bg-base-100 px-3 *:border-b-0"
