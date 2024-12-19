@@ -25,7 +25,7 @@ const Post = ({ post }: { post: PostType }) => {
   const { data: authUser } = useQuery<UserType>({ queryKey: ["authUser"] });
   const { follow, isPending: isFollowPending } = useFollow();
 
-  const postUserId = post?.user._id;
+  const postUserId = post?.user?._id;
   const postId = post?._id;
   const isMyPost = postUserId === authUser?._id;
   const isFollowing = authUser?.following.includes(postUserId);
