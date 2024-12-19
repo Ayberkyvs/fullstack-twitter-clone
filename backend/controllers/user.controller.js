@@ -136,3 +136,55 @@ export const updateUserProfile = async (req, res) => {
         res.status(500).json({error: 'Internal Server Error'});
     }
 };
+
+// export const deleteAccount = async (req, res) => {
+//     const currentUserId = req.user._id;
+
+//     try {
+//         // Kullanıcıyı bul
+//         const user = await User.findById(currentUserId);
+//         if (!user) return res.status(404).json({ error: 'User not found' });
+
+//         // İlişkili verileri bul
+//         const [userPosts, userLikedPosts, userNotifications, userFollowers, userFollowing] = await Promise.all([
+//             Post.find({ userId: currentUserId }),
+//             Post.find({ likes: currentUserId }),
+//             Notification.find({ $or: [{ from: currentUserId }, { to: currentUserId }] }),
+//             User.find({ followers: currentUserId }),
+//             User.find({ following: currentUserId }),
+//         ]);
+
+//         // Takipçi ve takip edilenlerden kullanıcıyı kaldır
+//         await Promise.all(userFollowers.map(follower =>
+//             follower.updateOne({ $pull: { following: currentUserId } })
+//         ));
+
+//         await Promise.all(userFollowing.map(following =>
+//             following.updateOne({ $pull: { followers: currentUserId } })
+//         ));
+
+//         // Kullanıcının beğendiği gönderilerden beğeni çıkar
+//         await Promise.all(userLikedPosts.map(post =>
+//             post.updateOne({ $pull: { likes: currentUserId }, $inc: { likeCount: -1 } })
+//         ));
+
+//         // Kullanıcının yeniden paylaştığı gönderilerden sayımı azalt
+//         await Promise.all(user.repostedPosts.map(post =>
+//             post.updateOne({ $inc: { repostCount: -1 } })
+//         ));
+
+//         // Kullanıcının gönderilerini ve bildirimlerini sil
+//         await Promise.all([
+//             ...userPosts.map(post => post.deleteOne()),
+//             ...userNotifications.map(notification => notification.deleteOne()),
+//         ]);
+
+//         // Kullanıcıyı sil
+//         await user.deleteOne();
+
+//         res.status(200).json({ message: 'Account deleted successfully' });
+//     } catch (error) {
+//         console.error("Error in deleteAccount controller:", error);
+//         res.status(500).json({ error: 'Internal Server Error' });
+//     }
+// };

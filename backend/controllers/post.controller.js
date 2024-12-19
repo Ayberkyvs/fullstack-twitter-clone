@@ -136,6 +136,7 @@ export const getUserPosts = async (req, res) => {
     // Kullanıcının kendi gönderilerini al
     const userPosts = await fetchPosts({ user: user._id }, { createdAt: -1 }, [
       { path: "user", select: "-password" },
+      { path: "parentPost", select: "-likes -childPosts", populate: { path: "user", select: "-password" } },
     ]);
 
     // Kullanıcının repostladığı gönderileri al

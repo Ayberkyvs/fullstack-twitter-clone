@@ -15,7 +15,6 @@ body {
     @apply border-primary font-semibold text-base-content !important;
 }
 
-
 p {
     word-break: break-all;
     white-space: normal;

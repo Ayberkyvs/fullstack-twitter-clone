@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 
 import Logo from "../../../components/svgs/Logo";
@@ -10,15 +10,22 @@ import { MdDriveFileRenameOutline } from "react-icons/md";
 import { useMutation } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { SignUpFormType } from "../../../utils/types";
-
+import { motion } from "framer-motion";
 const SignUpPage = () => {
+  const navigate = useNavigate();
+  const [read, setRead] = useState(false);
   const [formData, setFormData] = useState<SignUpFormType>({
     email: "",
     username: "",
     fullName: "",
     password: "",
   });
-  const { mutate:signUpMutation, isError, isPending, error } = useMutation({
+  const {
+    mutate: signUpMutation,
+    isError,
+    isPending,
+    error,
+  } = useMutation({
     mutationFn: async ({
       email,
       username,
@@ -43,6 +50,7 @@ const SignUpPage = () => {
     },
     onSuccess: () => {
       toast.success("Signed up successfully");
+      navigate("/");
     },
     onError: (error) => {
       console.error(error);
@@ -61,7 +69,41 @@ const SignUpPage = () => {
       setFormData({ ...formData, [target.name]: target.value });
     }
   };
-
+  if (!read) {
+    return (
+      <div className="flex justify-center items-center w-full h-full">
+        <Logo className="absolute w-full fill-base-content opacity-20 stroke-2 stroke-base-200 shadow-xl" />
+        <motion.div
+        initial={{ opacity: 0, scale: 0}}
+        animate={{ opacity: 1, scale: [0, 1.2, 1] }}
+        transition={{ duration: 0.5 }}
+        className="flex flex-col bg-base-200 p-4 rounded-lg gap-5 m-5 max-w-md z-[1] shadow-lg">
+          <Logo className="w-12 fill-base-content" />
+          <h1 className="text-3xl xs:text-4xl font-extrabold">Announcement!</h1>
+          <p className="leading-relax text-base">
+            <span className="text-error">
+              Account deletion is currently unavailable.
+            </span>{" "}
+            By signing up, you acknowledge and accept this limitation. If you wish to request data deletion, please contact us directly.<br />
+            <a
+              href="mailto:contact@ayberkyavas.com"
+              className="link link-primary"
+              target="_blank"
+            >
+              contact@ayberkyavas.com
+            </a>
+          </p>
+          <button
+            className="btn btn-primary w-fit place-self-end"
+            type="button"
+            onClick={() => setRead(true)}
+          >
+            I read, go on.
+          </button>
+        </motion.div>
+      </div>
+    );
+  }
   return (
     <div className="w-full mx-auto flex min-h-screen h-fit p-5 sm:px-10">
       <div className="flex-1 hidden lg:flex items-center justify-center">
