@@ -30,7 +30,7 @@ const SettingsPage = () => {
     }
   return (
     <div className='min-h-screen'>
-        <PageHeading title='Settings'/>
+        <PageHeading title='Settings' headerMobile={false} />
         <div className='flex flex-col justify-start items-start'>
             <Collapse title='Theme'>
             <div className="join flex-wrap join-horizontal border-none my-2" >

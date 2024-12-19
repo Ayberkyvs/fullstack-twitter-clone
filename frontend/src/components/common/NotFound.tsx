@@ -1,4 +1,3 @@
-import Logo from '../svgs/Logo'
 const NotFound = ({className, errorMessage}: {className: string, errorMessage: string}) => {
   return (
     <div className={`flex flex-col items-center justify-center w-full h-full ${className}`}>

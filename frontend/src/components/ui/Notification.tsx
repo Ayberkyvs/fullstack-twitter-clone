@@ -37,7 +37,6 @@ const Notification = ({ notification }: { notification: any }) => {
     }
   };
 
-  console.log(notification);
   return (
     <div className={`text-base-content p-6 w-full mx-auto border-b border-base-content/10 ${notification.read ? "" : "bg-base-200"}`}>
       <div className="flex items-start gap-3">

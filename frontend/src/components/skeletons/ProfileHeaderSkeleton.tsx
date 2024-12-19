@@ -4,7 +4,7 @@ import PostSkeleton from "./PostSkeleton";
 const ProfileHeaderSkeleton = () => {
 	return (
 		<>
-		<PageHeading title={<div className="skeleton w-24 h-5"></div>} subtitle={<div className="skeleton w-14 h-3"></div>} />
+		<PageHeading title={<div className="skeleton w-24 h-5"></div>} subtitle={<div className="skeleton w-14 h-3"></div>} headerMobile={false} />
 		<div className='flex flex-col w-full border-b border-base-content/10 pb-4'>
 			<div className='flex gap-2 items-center'>
 				<div className='flex flex-1 gap-1'>

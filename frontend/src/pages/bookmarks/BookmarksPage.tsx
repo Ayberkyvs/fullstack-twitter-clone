@@ -5,7 +5,7 @@ const BookmarksPage = () => {
   // Logic goes here
   return (
     <div>
-        <PageHeading title='Bookmarks' />
+        <PageHeading title='Bookmarks' headerMobile={false}/>
         <Posts feedType='bookmarks'/>
     </div>
   )

@@ -148,7 +148,6 @@ export const getUserPosts = async (req, res) => {
       [{ path: "user", select: "-password" }]
     );
 
-    console.log(repostedPosts)
     // Repostlara ek bilgi ekle
     repostedPosts.forEach((post) => {
       post.repostedBy = user; // Repost eden kullanıcı bilgisi
@@ -415,8 +414,6 @@ export const repostPost = async (req, res) => {
     const currentUserId = req.user._id.toString();
     const postId = req.params.id;
 
-    console.log("Reposting post with ID: " + postId);
-    //! If post deleted, pull postId from repostedPosts array of user
     if (!postId) {
       return res.status(400).json({ message: "Post ID is required" });
     }

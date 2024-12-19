@@ -55,7 +55,7 @@ const FollowersFollowing = () => {
       <div className="flex flex-col items-center justify-center gap-2 p-4">
         {(isPending || isRefetching) && <LoadingSpinner size="lg" />}
         {users && users.length > 0 && !isPending && !isRefetching
-          ? users.map((user: UserType) => {
+          ? users.map((user: any) => {
               const isFollowing =
                 authUser?.following.includes(user._id) ?? false;
               return (

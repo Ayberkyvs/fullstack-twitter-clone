@@ -1,22 +1,25 @@
-import LoginPage from "./pages/auth/login/LoginPage";
-import SignUpPage from "./pages/auth/signup/SignUpPage";
-import HomePage from "./pages/home/HomePage";
-import NotificationPage from "./pages/notification/NotificationPage";
-import ProfilePage from "./pages/profile/ProfilePage";
-import ExplorePage from "./pages/explore/ExplorePage";
-import BookmarksPage from "./pages/bookmarks/BookmarksPage";
-import SettingsPage from "./pages/settings/SettingsPage";
-
-import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
-import Sidebar from "./components/common/Sidebar";
-import RightPanel from "./components/common/RightPanel";
 import React from "react";
-import Dock from "./components/common/Dock";
+import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { useQuery } from "@tanstack/react-query";
 import LoadingSpinner from "./components/common/LoadingSpinner";
-import PostPage from "./pages/post/PostPage";
-import FollowersFollowing from "./pages/profile/FollowersFollowing";
+
+// Lazy load pages
+const LoginPage = React.lazy(() => import("./pages/auth/login/LoginPage"));
+const SignUpPage = React.lazy(() => import("./pages/auth/signup/SignUpPage"));
+const HomePage = React.lazy(() => import("./pages/home/HomePage"));
+const NotificationPage = React.lazy(() => import("./pages/notification/NotificationPage"));
+const ProfilePage = React.lazy(() => import("./pages/profile/ProfilePage"));
+const ExplorePage = React.lazy(() => import("./pages/explore/ExplorePage"));
+const BookmarksPage = React.lazy(() => import("./pages/bookmarks/BookmarksPage"));
+const SettingsPage = React.lazy(() => import("./pages/settings/SettingsPage"));
+const PostPage = React.lazy(() => import("./pages/post/PostPage"));
+const FollowersFollowing = React.lazy(() => import("./pages/profile/FollowersFollowing"));
+
+// Lazy load common components
+const Sidebar = React.lazy(() => import("./components/common/Sidebar"));
+const RightPanel = React.lazy(() => import("./components/common/RightPanel"));
+const Dock = React.lazy(() => import("./components/common/Dock"));
 
 function App() {
   const navigate = useNavigate();

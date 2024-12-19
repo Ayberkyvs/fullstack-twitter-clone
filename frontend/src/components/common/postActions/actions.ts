@@ -48,7 +48,6 @@ const Actions = () => {
         if (!oldPosts) return;
         return oldPosts.map((post) => {
           if (post._id === postId) {
-            console.log("asdasdadsad");
             return {
               ...post,
               likeCount: post.likeCount + (isLiked ? -1 : 1),
@@ -111,7 +110,7 @@ const Actions = () => {
       setIsReposted: any;
     }) => {
       const authUser = queryClient.getQueryData<UserType>(["authUser"]);
-      const isReposted = authUser?.repostedPosts.includes(postId as any) ?? false  //! Typescript Error here but its right bro idk;
+      const isReposted = authUser?.repostedPosts.includes(postId as any) ?? false
       setIsReposted((prev: boolean) => !prev);
       // Optimistic Update
       await queryClient.cancelQueries();
@@ -141,7 +140,6 @@ const Actions = () => {
         if (!oldPosts) return;
         return oldPosts.map((post) => {
           if (post._id === postId) {
-            console.log("asdasdadsad");
             return {
               ...post,
               repostCount: post.repostCount + (isReposted ? -1 : 1),

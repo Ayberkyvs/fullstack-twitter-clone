@@ -1,6 +1,5 @@
 import React from "react";
 import PageHeading from "../../components/ui/PageHeading";
-import { POSTS } from "../../utils/db/dummy";
 import Posts from "../../components/common/Posts";
 import ProfileHeaderSkeleton from "../../components/skeletons/ProfileHeaderSkeleton";
 import EditProfileModal from "../../components/ui/EditProfileModal";
@@ -21,8 +20,8 @@ const ProfilePage = () => {
   const params = useParams();
   const username:string = params?.username ?? "a";
 
-  const [coverImg, setCoverImg] = React.useState(null);
-  const [profileImg, setProfileImg] = React.useState(null);
+  const [coverImg, setCoverImg] = React.useState<string | ArrayBuffer | null>(null);
+  const [profileImg, setProfileImg] = React.useState<string | ArrayBuffer | null>(null);
   const [feedType, setFeedType] = React.useState("posts");
 
   const tabs = [
@@ -51,7 +50,6 @@ const ProfilePage = () => {
     },
   });
 
-  console.log("user", user);
   React.useEffect(() => {
     refetchUser();
   }, [username, refetchUser]);
@@ -59,8 +57,8 @@ const ProfilePage = () => {
   const { isUpdatingProfile, updateProfile } = useUpdateUserProfile();
   const { follow, isPending: isFollowPending } = useFollow();
 
-  const coverImgRef = React.useRef(null);
-  const profileImgRef = React.useRef(null);
+  const coverImgRef =React.useRef<HTMLInputElement | null>(null); ;
+  const profileImgRef = React.useRef<HTMLInputElement | null>(null);;
   const isMyProfile = authUser?._id === user?._id;
   const isFollowing = authUser?.following.includes(user?._id);
 
@@ -72,8 +70,8 @@ const ProfilePage = () => {
     if (file) {
       const reader = new FileReader();
       reader.onload = () => {
-        state === "coverImg" && setCoverImg(reader.result);
-        state === "profileImg" && setProfileImg(reader.result);
+        state === "coverImg" && setCoverImg(reader.result as string | ArrayBuffer);
+        state === "profileImg" && setProfileImg(reader.result as string | ArrayBuffer);
       };
       reader.readAsDataURL(file);
     }
@@ -90,7 +88,7 @@ const ProfilePage = () => {
           <>
             <PageHeading
               title={<h1 className="flex w-fit gap-1 font-bold text-xl">{user?.fullName} {user?.badge && findBadge(user?.badge)}</h1>}
-              subtitle={`${POSTS?.length} posts`}
+              subtitle={`${user?.followers?.length} followers`}
               headerMobile={false}
             />
             {/* COVER IMG */}
@@ -103,7 +101,7 @@ const ProfilePage = () => {
               {isMyProfile && (
                 <div
                   className="absolute top-2 right-2 rounded-full p-2 bg-base-200 bg-opacity-75 cursor-pointer opacity-0 group-hover/cover:opacity-100 transition duration-200"
-                  onClick={() => coverImgRef.current.click()}
+                  onClick={() => coverImgRef.current && coverImgRef.current.click()}
                 >
                   <MdEdit className="w-5 h-5 text-base-content" />
                 </div>
@@ -137,7 +135,7 @@ const ProfilePage = () => {
                   {isMyProfile && (<div className="absolute top-5 right-5 p-1 bg-primary rounded-full group-hover/avatar:opacity-100 opacity-0 cursor-pointer">
                       <MdEdit
                         className="w-4 h-4 text-white"
-                        onClick={() => profileImgRef.current.click()}
+                        onClick={() => profileImgRef.current && profileImgRef.current.click()}
                       />
                   </div>
                   )}

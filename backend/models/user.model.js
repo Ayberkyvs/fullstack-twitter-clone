@@ -68,7 +68,7 @@ const userSchema = new mongoose.Schema({
     ],
 }, {timestamps: true});
 
-//! mongoose-hidden plugini password icin eklenebilir.
+//? mongoose-hidden plugini password icin eklenebilir.
 
 userSchema.pre('remove', async function (next) {
     try {

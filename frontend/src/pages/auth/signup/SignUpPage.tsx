@@ -41,8 +41,7 @@ const SignUpPage = () => {
         throw error;
       }
     },
-    onSuccess: (data) => {
-      console.log(data);
+    onSuccess: () => {
       toast.success("Signed up successfully");
     },
     onError: (error) => {

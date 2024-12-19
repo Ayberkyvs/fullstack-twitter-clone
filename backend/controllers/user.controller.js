@@ -14,7 +14,6 @@ export const getUserProfile = async (req, res) => {
             .select('-password')
             .populate('followers', 'fullName username profileImg')
             .populate('following', 'fullName username profileImg');
-        
         if (!user) return res.status(404).json({error: 'User not found'});
         res.status(200).json(user);
     } catch (error) {
@@ -29,8 +28,9 @@ export const getSuggestedUsers = async (req, res) => {
         const usersFollowedByMe = await User.findById(currentUserId).select('following');
         const usersToExclude = [...(usersFollowedByMe.following || []).map(user => user._id), currentUserId];
         const suggestedUsers = await User.find({_id: {$nin: usersToExclude}}).select('-password').limit(20);
-        //! User.find never returns null, it returns an empty array if no users are found
-        if (suggestedUsers.length === 0) return res.status(404).json({error: 'No users found'});
+
+        //? User.find never returns null, it returns an empty array if no users are found
+        if (suggestedUsers.length <= 0) return res.status(404).json({error: 'No users found'});
         res.status(200).json(suggestedUsers);
     } catch (error) {
         console.error("Error in getSuggestedUsers controller: "+ error.message);
