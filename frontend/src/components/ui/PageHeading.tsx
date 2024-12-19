@@ -6,6 +6,7 @@ import React from "react";
 import CurrentUser from "./CurrentUser";
 import Logo from "../svgs/Logo";
 import MenuItems from "../../utils/MenuItems";
+import Search from "./Search";
 const PageHeading = ({
   title,
   subtitle,
@@ -93,6 +94,9 @@ React.useEffect(() => {
                         }
                         return null;
                     })}
+                    <li className="mt-4">
+                      <Search className="border p-0"/>
+                    </li>
                 </ul>
             </div>
         </div>

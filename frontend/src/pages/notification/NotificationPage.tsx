@@ -7,6 +7,7 @@ import toast from "react-hot-toast";
 import { NotificationType } from "../../utils/types";
 import Notification from "../../components/ui/Notification";
 import { v4 as uuidv4 } from 'uuid';
+import NotFound from "../../components/common/NotFound";
 
 const NotificationPage = () => {
   const queryClient = useQueryClient();
@@ -105,6 +106,9 @@ const NotificationPage = () => {
               <Notification key={uuidv4()} notification={notification} />
             );
           })}
+        {!isNotificationsLoading && notifications.length === 0 && (
+          <NotFound errorMessage="No Notifications Found 😱" className="my-2" />
+        )}
       </div>
     </>
   );

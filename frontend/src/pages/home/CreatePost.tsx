@@ -6,7 +6,19 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { PostType, UserType } from "../../utils/types";
 import Avatar from "../../components/common/Avatar";
 
-const CreatePost = ({ className, type = "original", parentPostId, showAvatar, modalName }: { className: string; type: "original" | "reply" ; parentPostId?: string, showAvatar:boolean, modalName?: string}) => {
+const CreatePost = ({
+  className,
+  type = "original",
+  parentPostId,
+  showAvatar,
+  modalName,
+}: {
+  className: string;
+  type: "original" | "reply";
+  parentPostId?: string;
+  showAvatar: boolean;
+  modalName?: string;
+}) => {
   const [text, setText] = useState("");
   const [img, setImg] = useState<string | ArrayBuffer | null>(null);
   const imgRef = useRef(null);
@@ -14,8 +26,23 @@ const CreatePost = ({ className, type = "original", parentPostId, showAvatar, mo
   const { data: authUser } = useQuery<UserType>({ queryKey: ["authUser"] });
   const queryClient = useQueryClient();
 
-  const { mutate: createPost, isError, isPending, error} = useMutation({
-    mutationFn: async ({ text, img, type, parentPostId}: { text: string; img: string | ArrayBuffer | null; type: string; parentPostId?: string}) => {
+  const {
+    mutate: createPost,
+    isError,
+    isPending,
+    error,
+  } = useMutation({
+    mutationFn: async ({
+      text,
+      img,
+      type,
+      parentPostId,
+    }: {
+      text: string;
+      img: string | ArrayBuffer | null;
+      type: string;
+      parentPostId?: string;
+    }) => {
       try {
         let requestBody: Record<string, any> = { text, img, type };
         if (type === "reply" && parentPostId) {
@@ -29,7 +56,10 @@ const CreatePost = ({ className, type = "original", parentPostId, showAvatar, mo
           body: JSON.stringify(requestBody),
         });
         const data = await res.json();
-        if (!res.ok) throw new Error(data.message || "An error occurred while creating the post.");
+        if (!res.ok)
+          throw new Error(
+            data.message || "An error occurred while creating the post."
+          );
         return data;
       } catch (error) {
         throw error;
@@ -87,10 +117,11 @@ const CreatePost = ({ className, type = "original", parentPostId, showAvatar, mo
     onSuccess: (data) => {
       const updateReplyCount = (oldData: PostType[]) => {
         if (!oldData) return oldData;
-        const updatedData = oldData
-          ?.map((p) =>
-            p._id === data.parentPost?._id ? { ...p, replyCount: data.parentPost.replyCount } : p
-          )
+        const updatedData = oldData?.map((p) =>
+          p._id === data.parentPost?._id
+            ? { ...p, replyCount: data.parentPost.replyCount }
+            : p
+        );
         return [data, ...updatedData];
       };
 
@@ -119,7 +150,7 @@ const CreatePost = ({ className, type = "original", parentPostId, showAvatar, mo
 
       queryClient.invalidateQueries({ queryKey: ["authUser"] });
       if (data.type === "reply") {
-        toast.success('You replied successfully')
+        toast.success("You replied successfully");
       } else if (data.type === "original") {
         toast.success("You posted successfully");
       } else {
@@ -140,8 +171,9 @@ const CreatePost = ({ className, type = "original", parentPostId, showAvatar, mo
     onSettled: () => {
       setText("");
       setImg(null);
-      modalName && (document.getElementById(modalName) as HTMLDialogElement).close();
-    }
+      modalName &&
+        (document.getElementById(modalName) as HTMLDialogElement).close();
+    },
   });
 
   const handleSubmit = (e: any) => {
@@ -149,9 +181,8 @@ const CreatePost = ({ className, type = "original", parentPostId, showAvatar, mo
     if ((!text && !img) || (text && text.trim() === "" && !img)) {
       toast.error("Please write something or upload an image to post.");
     } else if (isPending) {
-      toast.loading("Posting...", { duration: 1500});
-    }
-    else {
+      toast.loading("Posting...", { duration: 1500 });
+    } else {
       createPost({ text, img, type, parentPostId });
     }
   };
@@ -167,18 +198,38 @@ const CreatePost = ({ className, type = "original", parentPostId, showAvatar, mo
     }
   };
 
+  const textLength = text.length;
   return (
-    <div className={`flex w-full h-fit min-h-[150px] p-4 items-start gap-4 ${className}`}>
-      {showAvatar && <Avatar user={authUser} className="w-12"/>}
-      <form className="flex flex-col gap-2 w-full h-full" onSubmit={handleSubmit}>
-        <div className="flex w-full">
-        <textarea
-          className="textarea w-full h-[60px] p-0 text-base resize-none border-none focus:outline-none placeholder:text-neutral rounded-none"
-          placeholder={type === "reply" ? "Write your reply..." : "What is happening?!"}
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-        />
-      </div>
+    <div
+      className={`flex w-full h-fit min-h-[150px] p-4 items-start gap-4 ${className}`}
+    >
+      {showAvatar && <Avatar user={authUser} className="w-12" />}
+      <form
+        className="flex flex-col gap-2 w-full h-full"
+        onSubmit={handleSubmit}
+      >
+        <div className="relative flex w-full">
+          <textarea
+            className="textarea w-full h-[60px] p-0 text-base resize-none border-none focus:outline-none placeholder:text-neutral rounded-none"
+            placeholder={
+              type === "reply" ? "Write your reply..." : "What is happening?!"
+            }
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+          />
+          {text && (
+            <p className="absolute text-neutral text-sm right-1 bottom-0">
+              <span
+                className={`${
+                  textLength > 250 ? "text-error" : "text-neutral"
+                }`}
+              >
+                {textLength > 250 ? `-${textLength - 250}` : textLength}
+              </span>{" "}
+              / 250
+            </p>
+          )}
+        </div>
         {img && (
           <div className="relative mx-auto w-full h-fit object-cover">
             <IoCloseSharp
@@ -190,11 +241,19 @@ const CreatePost = ({ className, type = "original", parentPostId, showAvatar, mo
                 }
               }}
             />
-            <img src={img as string} alt="Uploaded content" className="w-fit max-w-full mx-auto max-h-[418px] object-fit rounded" />
+            <img
+              src={img as string}
+              alt="Uploaded content"
+              className="w-fit max-w-full mx-auto max-h-[418px] object-fit rounded"
+            />
           </div>
         )}
 
-        <div className={`flex justify-between py-2 ${text || img !== null ? "border-t border-t-base-content/10" : ""}`}>
+        <div
+          className={`flex justify-between py-2 ${
+            text || img !== null ? "border-t border-t-base-content/10" : ""
+          }`}
+        >
           <div className="flex gap-2 items-center">
             <GoImage
               className="fill-primary w-6 h-6 cursor-pointer"
@@ -206,8 +265,19 @@ const CreatePost = ({ className, type = "original", parentPostId, showAvatar, mo
             />
             {/* <FaRegSmile className="fill-primary w-5 h-5 cursor-pointer" /> */}
           </div>
-          <input type="file" accept="image/*" hidden ref={imgRef} onChange={handleImgChange} />
-          <button className="btn btn-primary rounded-full btn-sm px-4" type="submit" onClick={handleSubmit}>
+          <input
+            type="file"
+            accept="image/*"
+            hidden
+            ref={imgRef}
+            onChange={handleImgChange}
+          />
+          <button
+            className="btn btn-primary rounded-full btn-sm px-4"
+            type="submit"
+            onClick={handleSubmit}
+            disabled={isPending || textLength > 250}
+          >
             {isPending ? "Posting..." : type === "reply" ? "Reply" : "Post"}
           </button>
         </div>

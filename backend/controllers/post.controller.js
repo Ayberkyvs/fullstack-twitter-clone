@@ -201,6 +201,8 @@ export const createPost = async (req, res) => {
       return res.status(400).json({ message: "Invalid post type" });
     if (postType === "reply" && !parentPostId)
       return res.status(400).json({ message: "Parent post ID is required" });
+    if (text && text.length > 250)
+      return res.status(400).json({ message: "Text character limit is 250 word." });
     if (img) {
       const uploadedResponse = await cloudinary.uploader.upload(img, {
         folder: `${currentUserId}/posts`,

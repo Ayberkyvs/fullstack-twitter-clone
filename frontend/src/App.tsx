@@ -95,6 +95,10 @@ function App() {
               element={!authUser ? <SignUpPage /> : <Navigate to="/" />}
             />
             <Route
+              path="/messages"
+              element={!authUser ? <h1>Not yet...</h1> : <Navigate to="/" />}
+            />
+            <Route
               path="/explore"
               element={authUser ? <ExplorePage /> : <Navigate to="/login" />}
             />
