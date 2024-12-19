@@ -92,7 +92,7 @@ const PostPage = () => {
 
       {isPostLoading && <PostSkeleton />}
       {post && !isPostLoading && (
-        <div className="w-full flex flex-col p-4 gap-1">
+        <div className="w-full flex flex-col p-4 gap-2">
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center gap-3">
               <Avatar
@@ -169,12 +169,12 @@ const PostPage = () => {
               <EmbedPost post={post?.parentPost} isSmall={isSmall} />
             )}
           </div>
-          <div className="w-full p-2 border-b border-base-content/10">
+          <div className="w-full py-2 border-b border-base-content/10">
             <span className="text-neutral w-fit">
               {new Date(post.createdAt).toLocaleString()}
             </span>
           </div>
-          <div className="p-2 border-b border-base-content/10">
+          <div className="py-2 border-b border-base-content/10">
             <PostActions post={post} />
           </div>
         </div>

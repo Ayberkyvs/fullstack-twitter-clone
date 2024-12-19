@@ -30,7 +30,7 @@ const PostActions = ({ post }: PostActionsProps) => {
   };
 
   return (
-    <div className="py-1 mt-1" onClick={(e) => e.preventDefault()}>
+    <div onClick={(e) => e.preventDefault()}>
     <PostActionsUI
       post={post}
       isLikedOptimistic={isLiked}

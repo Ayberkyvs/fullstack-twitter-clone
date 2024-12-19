@@ -3,6 +3,7 @@ import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { useQuery } from "@tanstack/react-query";
 import LoadingSpinner from "./components/common/LoadingSpinner";
+import MessagesPage from "./pages/messages/MessagesPage";
 
 // Lazy load pages
 const LoginPage = React.lazy(() => import("./pages/auth/login/LoginPage"));
@@ -73,7 +74,7 @@ function App() {
                   : "xl:grid-cols-[minmax(0,330px)_1fr_minmax(0,330px)]"
               }`
             : "flex"
-        } justify-center max-w-screen-2xl w-full h-screen fixed top-0 left-[50%] transform -translate-x-1/2`}
+        } justify-center max-w-screen-2xl w-full h-full fixed top-0 left-[50%] transform -translate-x-1/2`}
       >
         {authUser && (
           <>
@@ -96,7 +97,7 @@ function App() {
             />
             <Route
               path="/messages"
-              element={!authUser ? <h1>Not yet...</h1> : <Navigate to="/" />}
+              element={authUser ? <MessagesPage /> : <Navigate to="/" />}
             />
             <Route
               path="/explore"

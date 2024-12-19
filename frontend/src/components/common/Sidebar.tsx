@@ -23,7 +23,7 @@ const Sidebar = ({
         collapse ? "" : "xl:px-5"
       }`}
     >
-      <Logo className="w-10 h-10 fill-primary mx-4" />
+      <Link to="/"><Logo className="w-10 h-10 fill-primary mx-4" /></Link>
       <nav className="flex flex-col justify-between w-full h-full">
         <ul
           className={`flex flex-col justify-center items-center ${
