@@ -198,7 +198,7 @@ const Post = ({ post }: { post: PostType }) => {
               <div className="w-fit h-fit mt-2">
                 <img
                   src={post.img}
-                  className="w-fit max-w-full h-fit max-h-[418px] object-cover rounded border border-neutral/30"
+                  className="w-fit max-w-full h-fit max-h-[318px] xs:max-h-[418px] object-cover rounded-xl border border-neutral/30"
                   alt="Post"
                 />
               </div>
