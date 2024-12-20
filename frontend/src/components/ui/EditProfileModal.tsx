@@ -35,7 +35,7 @@ const EditProfileModal = ({authUser} :{authUser: UserType}) => {
 				<div className='modal-box border rounded-md border-base-content/10 shadow-md p-4'>
 					<h3 className='font-bold text-lg mb-3'>Update Profile</h3>
 					<form
-						className='flex flex-col w-full gap-4 border'
+						className='flex flex-col w-full gap-4'
 						onSubmit={(e) => {
 							e.preventDefault();
 							updateProfile(formData);

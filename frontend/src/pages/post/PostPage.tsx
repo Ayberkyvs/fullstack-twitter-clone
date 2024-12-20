@@ -188,7 +188,7 @@ const PostPage = () => {
             showAvatar={false}
           />
         )}
-        <ul className="flex flex-col items-center justify-center gap-3 min-h-[350px] border">
+        <ul className="flex flex-col items-center justify-center gap-3 min-h-[350px]">
           {(isRepliesLoading || isRepliesRefetching) &&
             Array.from({ length: 4 }).map((_, index) => (
               <PostSkeleton key={index} image={false} />
