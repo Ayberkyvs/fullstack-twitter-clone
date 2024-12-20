@@ -119,7 +119,7 @@ const Post = ({ post }: { post: PostType }) => {
   };
 
   return (
-    <Link to={`/${post.user.username}/status/${post._id}`} className="relative w-full flex flex-col items-start h-fit p-2 xs:p-[15px] border-b border-base-content/10 hover:bg-base-200/50">
+    <Link to={`/${post?.user?.username}/status/${post?._id}`} className="relative w-full flex flex-col items-start h-fit p-2 xs:p-[15px] border-b border-base-content/10 hover:bg-base-200/50">
       {(isDeleting) && (
         <div className="flex justify-center items-center absolute top-0 left-0 w-full h-full bg-base-100/60 z-[1]">
           <LoadingSpinner size="lg" />
@@ -128,39 +128,39 @@ const Post = ({ post }: { post: PostType }) => {
       {isReply && (
         <p className="flex justify-center items-center text-neutral gap-2 text-sm px-5 font-bold">
           <CommentIcon className="w-[1.1em] h-[1.1em]" />
-          {isMyPost ? "You" : `@${post.user.username}`} replied to{" "}
+          {isMyPost ? "You" : `@${post?.user?.username}`} replied to{" "}
           <span className="text-primary">
-            @{post.parentPost?.user.username}
+            @{post?.parentPost?.user?.username}
           </span>{" "}
           post.
         </p>
       )}
-      {post.repostedBy && (
+      {post?.repostedBy && (
         <p className="flex justify-center items-center text-neutral gap-2 text-sm px-5 font-bold">
           <RepostIcon className="w-[1.1em] h-[1.1em]" isReposted/>
-          {post.repostedBy.username} reposted
+          {post?.repostedBy?.username} reposted
         </p>
       )}
       <div className="flex w-full h-fit gap-3">
         <Avatar
-          user={post.user}
+          user={post?.user}
           className="w-9 h-9 xs:w-10 xs:h-10"
         />
         <div className="flex flex-col w-full h-fit gap-1">
           <div className="grid grid-rows-2 grid-cols-1 xs:grid-rows-none xs:grid-cols-[auto_1fr] gap-[2px] xs:gap-2">
             <div className="flex w-fit h-fit justify-center items-center gap-1 text-base font-bold">
-              <h3>{post.user.fullName}</h3>
+              <h3>{post?.user?.fullName}</h3>
               {post.user?.badge && <span>{findBadge(post.user?.badge)}</span>}
             </div>
             <div className="flex w-full h-fit justify-between items-center text-neutral">
               <span className="text-sm xs:text-base">
-                @{post.user.username} · {formatDate(post.createdAt)}
+                @{post?.user?.username} · {formatDate(post?.createdAt)}
               </span>
               <DropdownSettings buttonClassName="m-0 h-full">
                 <li>
-                  <Link to={`profile/${post.user.username}`}>
+                  <Link to={`profile/${post?.user?.username}`}>
                     <GoPerson className="w-[1.3em] h-[1.3em]" /> Visit @
-                    {post.user.username} profile
+                    {post?.user?.username} profile
                   </Link>
                 </li>
                 {!isMyPost && (
@@ -177,7 +177,7 @@ const Post = ({ post }: { post: PostType }) => {
                           Follow
                         </>
                       )}{" "}
-                      @{post.user.username}
+                      @{post?.user?.username}
                     </button>
                   </li>
                 )}
