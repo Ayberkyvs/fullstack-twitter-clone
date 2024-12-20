@@ -25,7 +25,7 @@ const RightPanel = () => {
 			/>
 		} /> */}
 		<HighlightsSection title="You might like" className="p-4">
-			<Explore exploreType="suggested" className="gap-5" limit={3}/>
+			<Explore exploreType="suggested" className="gap-5" limit={5}/>
 			<Link to="/explore?tab=suggested" className="link link-primary text-base mt-2">Show More</Link>
 		</HighlightsSection>
 		<HighlightsSection title="What's happening" className="p-4">

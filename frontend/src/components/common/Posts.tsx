@@ -38,7 +38,8 @@ const Posts = ({feedType, username, userId}: {feedType: string, username?: strin
 				throw error;
 			}
 		},
-		refetchInterval: 1000 * 60 * 1,
+		refetchInterval: 1000 * 60 * 3,
+		retry: 1,
 	});
 
 	React.useEffect(() => {
@@ -46,6 +47,7 @@ const Posts = ({feedType, username, userId}: {feedType: string, username?: strin
 	},[feedType, refetch, username]);
 	return (
 	<div className='flex flex-col justify-center border-t border-base-content/10 '>
+		{!isRefetching && <div className="w-full h-fit p-4 text-center border-b border-base-content/10" onClick={()=>refetch()}><p className="link link-primary">Show latest posts</p></div>}
 		{(isLoading || isRefetching) &&
 			Array.from({ length: 3 }).map((_, index) => (
 				<PostSkeleton key={index} />

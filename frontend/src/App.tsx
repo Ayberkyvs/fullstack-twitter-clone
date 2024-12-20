@@ -81,7 +81,7 @@ function App() {
             <Sidebar collapse={collapse} setCollapse={setCollapse} />
           </>
         )}
-        <main className="break-words w-full overflow-auto scrollbar-hide">
+        <main className="break-words w-full h-full overflow-auto scrollbar-hide">
           <Routes>
             <Route
               path="/"
