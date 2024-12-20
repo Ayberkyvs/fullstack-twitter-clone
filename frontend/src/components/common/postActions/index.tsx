@@ -41,7 +41,7 @@ const PostActions = ({ post }: PostActionsProps) => {
       onRepost={handleRepost}
       onCopyLink={() =>
         copyToClipboard(
-          `https://x.ayberkyavas.com/${post.user.username}/posts/${post._id}`
+          `https://fullstack-twitter-clone-hoaw.onrender.com/${post.user.username}/status/${post._id}`
         )
       }
       isLiking={isLiking}
